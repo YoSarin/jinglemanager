@@ -1,6 +1,8 @@
 package main
 
 import (
+	"github.com/martin-reznik/jinglemanager/manager"
+	"github.com/martin-reznik/jinglemanager/server"
 	"github.com/martin-reznik/logger"
 	"net/http"
 )
@@ -10,11 +12,13 @@ func main() {
 	log.LogSeverity[logger.DEBUG] = true
 	defer log.Close()
 
-	http.Handle("/", Index{log})
+	http.Handle("/", server.Index{Logger: log})
 
-	http.Handle("/css/", Static{log})
-	http.Handle("/js/", Static{log})
-	http.Handle("/images/", Static{log})
+	http.Handle("/css/", server.Static{Logger: log})
+	http.Handle("/js/", server.Static{Logger: log})
+	http.Handle("/images/", server.Static{Logger: log})
+
+	http.Handle("/play", manager.Player{Logger: log})
 
 	log.Info("Server is up and running, open 'http://localhost:8080' in your browser")
 
