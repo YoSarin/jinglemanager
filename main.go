@@ -12,13 +12,18 @@ func main() {
 	log.LogSeverity[logger.DEBUG] = true
 	defer log.Close()
 
-	http.Handle("/", server.Index{Logger: log})
+	httpHandler := server.HTTPHandler{Logger: log}
+	fileHandler := server.FileProxyHandler{Logger: log}
+	playerHandler := manager.PlayerHandler{Logger: log}
 
-	http.Handle("/css/", server.Static{Logger: log})
-	http.Handle("/js/", server.Static{Logger: log})
-	http.Handle("/images/", server.Static{Logger: log})
+	http.HandleFunc("/", httpHandler.Index)
 
-	http.Handle("/play", manager.Player{Logger: log})
+	http.HandleFunc("/css/", fileHandler.Static)
+	http.HandleFunc("/js/", fileHandler.Static)
+	http.HandleFunc("/images/", fileHandler.Static)
+
+	http.HandleFunc("/play", playerHandler.Play)
+	http.HandleFunc("/stop", playerHandler.Stop)
 
 	log.Info("Server is up and running, open 'http://localhost:8080' in your browser")
 

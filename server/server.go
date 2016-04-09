@@ -8,8 +8,8 @@ import (
 	"net/http"
 )
 
-// Index - index handler
-type Index struct {
+// HTTPHandler - handler for serving httpPages
+type HTTPHandler struct {
 	Logger *logger.Log
 }
 
@@ -18,8 +18,8 @@ type IndexData struct {
 	Body  string
 }
 
-// ServeHTTP - will serve HTTP
-func (i Index) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+// Index - will serve index page
+func (i *HTTPHandler) Index(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path != "/" {
 		http.NotFound(w, r)
 		return
@@ -33,17 +33,18 @@ func (i Index) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	t.Execute(w, &IndexData{"Titulek", "Nazdar"})
 }
 
-// Static - handler for static content
-type Static struct {
+// FileProxyHandler - struct handling file returns from server
+type FileProxyHandler struct {
 	Logger *logger.Log
 }
 
-func (s Static) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+// Static - handler for static content
+func (f *FileProxyHandler) Static(w http.ResponseWriter, r *http.Request) {
 	path := fmt.Sprintf("static%v", r.URL.Path)
-	s.Logger.Debug(fmt.Sprintf("Path to fetch: %v", path))
+	f.Logger.Debug(fmt.Sprintf("Path to fetch: %v", path))
 	data, err := ioutil.ReadFile(path)
 	if err != nil {
-		s.Logger.Error(err.Error())
+		f.Logger.Error(err.Error())
 		http.NotFound(w, r)
 		return
 	}
