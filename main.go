@@ -1,7 +1,6 @@
 package main
 
 import (
-	"github.com/martin-reznik/jinglemanager/manager"
 	"github.com/martin-reznik/jinglemanager/server"
 	"github.com/martin-reznik/logger"
 	"net/http"
@@ -14,7 +13,7 @@ func main() {
 
 	httpHandler := server.HTTPHandler{Logger: log}
 	fileHandler := server.FileProxyHandler{Logger: log}
-	playerHandler := manager.PlayerHandler{Logger: log}
+	playerHandler := server.PlayerHandler{Logger: log}
 
 	http.HandleFunc("/", httpHandler.Index)
 
@@ -24,6 +23,7 @@ func main() {
 
 	http.HandleFunc("/play", playerHandler.Play)
 	http.HandleFunc("/stop", playerHandler.Stop)
+	http.HandleFunc("/list", playerHandler.List)
 
 	log.Info("Server is up and running, open 'http://localhost:8080' in your browser")
 

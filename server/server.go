@@ -13,6 +13,7 @@ type HTTPHandler struct {
 	Logger *logger.Log
 }
 
+// IndexData - nope yet
 type IndexData struct {
 	Title string
 	Body  string
