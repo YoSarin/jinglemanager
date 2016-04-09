@@ -2,6 +2,7 @@ package server
 
 import (
 	"fmt"
+	"github.com/julienschmidt/httprouter"
 	"github.com/martin-reznik/logger"
 	"html/template"
 	"io/ioutil"
@@ -20,7 +21,7 @@ type IndexData struct {
 }
 
 // Index - will serve index page
-func (i *HTTPHandler) Index(w http.ResponseWriter, r *http.Request) {
+func (i *HTTPHandler) Index(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	if r.URL.Path != "/" {
 		http.NotFound(w, r)
 		return
@@ -40,7 +41,7 @@ type FileProxyHandler struct {
 }
 
 // Static - handler for static content
-func (f *FileProxyHandler) Static(w http.ResponseWriter, r *http.Request) {
+func (f *FileProxyHandler) Static(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	path := fmt.Sprintf("static%v", r.URL.Path)
 	f.Logger.Debug(fmt.Sprintf("Path to fetch: %v", path))
 	data, err := ioutil.ReadFile(path)
