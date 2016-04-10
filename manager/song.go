@@ -126,12 +126,12 @@ func (s *Song) Position() float64 {
 // ########### FileListItem implementation ##############
 
 // ID - will return songs ID
-func (s *Song) ID() string {
+func (s Song) ID() string {
 	return s.id
 }
 
 // FileName - will return filename of song
-func (s *Song) FileName() string {
+func (s Song) FileName() string {
 	return s.File
 }
 
