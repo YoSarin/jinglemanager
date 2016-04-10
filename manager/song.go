@@ -4,39 +4,45 @@ import (
 	"bitbucket.org/weberc2/media/ao"
 	"bitbucket.org/weberc2/media/mpg123"
 	"bytes"
-	"errors"
+	"crypto/md5"
+	"encoding/json"
 	"fmt"
-	"github.com/martin-reznik/logger"
 	"io"
 	"io/ioutil"
 	"os"
 )
 
+// LogI - intrface for logger
+type LogI interface {
+	Info(string)
+	Warning(string)
+	Error(string)
+	Debug(string)
+	Notice(string)
+}
+
 // Song - queue item containing info about playing sound
 type Song struct {
-	ID           int
+	id           string
 	File         string
-	logger       *logger.Log
+	logger       LogI
 	stream       []byte
 	ao           *ao.SampleFormat
 	playing      bool
 	bytesPlayed  int64
 	bytesTotal   int64
 	stopPlayback chan bool
+	done         chan bool
 }
 
-var songList = make(map[int]*Song)
-var lastID = 0
-
 // NewSong - creates new song
-func NewSong(filename string, log *logger.Log) (*Song, error) {
+func NewSong(filename string, log LogI) (*Song, error) {
 	if _, err := os.Stat(filename); os.IsNotExist(err) {
 		return nil, fmt.Errorf("File %v does not exist", filename)
 	}
-	lastID++
 	stream, ao := getMusicStream(filename)
 	s := &Song{
-		ID:           lastID,
+		id:           fmt.Sprintf("%x", md5.Sum(stream)),
 		File:         filename,
 		logger:       log,
 		stream:       stream,
@@ -45,38 +51,25 @@ func NewSong(filename string, log *logger.Log) (*Song, error) {
 		bytesPlayed:  0,
 		bytesTotal:   int64(len(stream)),
 		stopPlayback: make(chan bool, 1),
-	}
-	songList[lastID] = s
-	return s, nil
-}
-
-// FindSong - finds and returns song by play id
-func FindSong(id int) (*Song, error) {
-	s, ok := songList[id]
-	if !ok {
-		return nil, errors.New("Song not found")
+		done:         make(chan bool, 1),
 	}
 	return s, nil
 }
 
-// FindSongByFile - finds if we already have this song prepared
-func FindSongByFile(filename string) *Song {
-	for _, s := range songList {
-		if s.File == filename {
-			return s
-		}
+// MarshalJSON - will convert song to JSON
+func (s *Song) MarshalJSON() ([]byte, error) {
+	data := struct {
+		ID        string
+		File      string
+		IsPlaying bool
+		Position  float64
+	}{
+		s.id, s.File, s.IsPlaying(), s.Position(),
 	}
-	return nil
+	return json.Marshal(data)
 }
 
-// GetAllPlaying - lists all songs which are in progress
-func GetAllPlaying() []*Song {
-	out := []*Song{}
-	for _, s := range songList {
-		out = append(out, s)
-	}
-	return out
-}
+// ########### SongI implementation ##############
 
 // IsPlaying - will return true if song is playing right now
 func (s *Song) IsPlaying() bool {
@@ -85,7 +78,6 @@ func (s *Song) IsPlaying() bool {
 
 // Play - plays song
 func (s *Song) Play() {
-	s.bytesPlayed = 0
 	go func() {
 		s.playing = true
 		defer s.playbackDone()
@@ -96,10 +88,9 @@ func (s *Song) Play() {
 		defer dev.Close()
 
 		bufSize := int64(1024)
-		for step := int64(0); step < s.bytesTotal/bufSize; step++ {
+		for step := int64(s.bytesPlayed / bufSize); step < s.bytesTotal/bufSize; step++ {
 			select {
 			case <-s.stopPlayback:
-				s.logger.Info("Playback stopped")
 				return
 			default:
 				size, err := dev.Write(s.stream[step*bufSize : (step+1)*bufSize])
@@ -115,7 +106,16 @@ func (s *Song) Play() {
 
 // Stop - stops playing
 func (s *Song) Stop() {
+	s.Pause()
+	// reset where we were in song to 0
+	s.bytesPlayed = 0
+}
+
+// Pause - pauses playing, so it can be resumed from the point where it was stopped
+func (s *Song) Pause() {
 	s.stopPlayback <- true
+	// wait for confirmation that playback has stopped
+	_ = <-s.done
 }
 
 // Position - percentage of file played (based on size)
@@ -123,6 +123,19 @@ func (s *Song) Position() float64 {
 	return float64(s.bytesPlayed) / float64(s.bytesTotal)
 }
 
+// ########### FileListItem implementation ##############
+
+// ID - will return songs ID
+func (s *Song) ID() string {
+	return s.id
+}
+
+// FileName - will return filename of song
+func (s *Song) FileName() string {
+	return s.File
+}
+
+// ########### private methods ##############
 // Get the ao.SampleFormat from the mpg123.Handle
 func aoPrepare(handle *mpg123.Handle) *ao.SampleFormat {
 	const bitsPerByte = 8
@@ -140,6 +153,7 @@ func aoPrepare(handle *mpg123.Handle) *ao.SampleFormat {
 
 func (s *Song) playbackDone() {
 	s.playing = false
+	s.done <- true
 }
 
 func getMusicStream(filename string) ([]byte, *ao.SampleFormat) {
@@ -159,7 +173,6 @@ func getMusicStream(filename string) ([]byte, *ao.SampleFormat) {
 	defer dev.Close()
 
 	rw := new(bytes.Buffer)
-	fmt.Printf("%v", handle)
 	_, err = io.Copy(rw, handle)
 	if err != nil {
 		panic("File read error " + err.Error())
