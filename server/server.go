@@ -17,7 +17,6 @@ type HTTPHandler struct {
 // IndexData - nope yet
 type IndexData struct {
 	Title string
-	Body  string
 }
 
 // Index - will serve index page
@@ -32,7 +31,7 @@ func (i *HTTPHandler) Index(w http.ResponseWriter, r *http.Request, ps httproute
 		http.Error(w, "Internal Server Error", 500)
 		return
 	}
-	t.Execute(w, &IndexData{"Titulek", "Nazdar"})
+	t.Execute(w, &IndexData{"Jingle Manager"})
 }
 
 // FileProxyHandler - struct handling file returns from server

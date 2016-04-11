@@ -11,6 +11,9 @@ import (
 )
 
 func main() {
+
+	server.Test()
+
 	log := logger.NewLog(func(line *logger.LogLine) { line.Print() })
 	log.LogSeverity[logger.DEBUG] = true
 	defer log.Close()

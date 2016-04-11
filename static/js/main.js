@@ -29,5 +29,17 @@ $(document).ready(function() {
             })
             return false;
         }
-    })
+    });
+
+    $("form#addSong").submit(function () {
+        var f = $(this);
+        console.log(f.attr("method"));
+        $.ajax("/track/add?filename=" + encodeURIComponent(f.find("input[name=filename]").val()), {
+            method: "POST",
+            success: function(data, status) { console.log("added") },
+            complete: function() { console.log("complete"); },
+            error: function() { console.log("error"); }
+        })
+        return false;
+    });
 });
