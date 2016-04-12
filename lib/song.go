@@ -1,4 +1,4 @@
-package manager
+package lib
 
 import (
 	"bitbucket.org/weberc2/media/ao"

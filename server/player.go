@@ -3,7 +3,7 @@ package server
 import (
 	"encoding/json"
 	"github.com/julienschmidt/httprouter"
-	"github.com/martin-reznik/jinglemanager/manager"
+	"github.com/martin-reznik/jinglemanager/lib"
 	"github.com/martin-reznik/logger"
 	"net/http"
 )
@@ -11,7 +11,7 @@ import (
 // PlayerHandler - player handler
 type PlayerHandler struct {
 	Logger   *logger.Log
-	SongList *manager.FileList
+	SongList *lib.FileList
 }
 
 // SongI - interface used to play songs
@@ -34,7 +34,7 @@ func (p *PlayerHandler) Add(w http.ResponseWriter, r *http.Request, ps httproute
 		w.Write(output)
 		return
 	}
-	s, err := manager.NewSong(songFile, p.Logger)
+	s, err := lib.NewSong(songFile, p.Logger)
 	if err != nil {
 		p.Logger.Error(err.Error())
 		http.NotFound(w, r)
