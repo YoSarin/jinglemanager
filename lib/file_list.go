@@ -52,10 +52,6 @@ func (l *FileList) FindByFile(filename string) FileListItem {
 }
 
 // GetAll - lists all songs which are in progress
-func (l *FileList) GetAll() []FileListItem {
-	out := []FileListItem{}
-	for _, s := range l.list {
-		out = append(out, s)
-	}
-	return out
+func (l *FileList) GetAll() map[string]FileListItem {
+	return l.list
 }

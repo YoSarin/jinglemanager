@@ -28,12 +28,12 @@ func main() {
 	router.GET("/js/*filepath", fileHandler.Static)
 	router.GET("/images/*filepath", fileHandler.Static)
 
-	router.DELETE("/track/delete/:id", playerHandler.Delete)
-	router.POST("/track/play/:id", playerHandler.Play)
 	router.POST("/track/add", playerHandler.Add)
+	router.GET("/track/list", playerHandler.List)
+	router.POST("/track/play/:id", playerHandler.Play)
 	router.POST("/track/stop/:id", playerHandler.Stop)
 	router.POST("/track/pause/:id", playerHandler.Pause)
-	router.GET("/track/list", playerHandler.List)
+	router.DELETE("/track/delete/:id", playerHandler.Delete)
 
 	router.POST("/app/mute", controlHandler.Mute)
 	router.POST("/app/unmute", controlHandler.UnMute)

@@ -40,7 +40,8 @@ func (p *PlayerHandler) Add(w http.ResponseWriter, r *http.Request, ps httproute
 		return
 	}
 	p.SongList.Add(s)
-	output, _ := json.Marshal(s)
+
+	output, _ := json.Marshal(p.SongList.GetAll())
 	w.Write(output)
 }
 
@@ -56,13 +57,14 @@ func (p *PlayerHandler) Play(w http.ResponseWriter, r *http.Request, ps httprout
 	}
 	s.Play()
 
-	output, _ := json.Marshal(s)
+	output, _ := json.Marshal(p.SongList.GetAll())
 	w.Write(output)
 }
 
 // List - will list all actually playing songs
 func (p *PlayerHandler) List(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	list := p.SongList.GetAll()
+
 	output, _ := json.Marshal(list)
 	w.Write(output)
 }
@@ -79,7 +81,7 @@ func (p *PlayerHandler) Stop(w http.ResponseWriter, r *http.Request, ps httprout
 	}
 	s.Stop()
 
-	output, _ := json.Marshal(s)
+	output, _ := json.Marshal(p.SongList.GetAll())
 	w.Write(output)
 }
 
@@ -95,13 +97,24 @@ func (p *PlayerHandler) Pause(w http.ResponseWriter, r *http.Request, ps httprou
 	}
 	s.Pause()
 
-	output, _ := json.Marshal(s)
+	output, _ := json.Marshal(p.SongList.GetAll())
 	w.Write(output)
 }
 
 // Delete - will remove song
 func (p *PlayerHandler) Delete(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	id := ps.ByName("id")
+
+	f, err := p.SongList.Find(id)
+	s, ok := f.(SongI)
+	if err != nil || !ok {
+		http.NotFound(w, r)
+		return
+	}
+
+	if s.IsPlaying() {
+		s.Stop()
+	}
 
 	p.SongList.Delete(id)
 
