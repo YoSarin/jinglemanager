@@ -34,10 +34,10 @@ func main() {
 	router.POST("/track/pause/:id", playerHandler.Pause)
 	router.GET("/track/list", playerHandler.List)
 
-	router.GET("/app/mute", controlHandler.Mute)
-	router.GET("/app/unmute", controlHandler.UnMute)
-	router.GET("/app/add/:app", controlHandler.Add)
-	router.GET("/app/remove/:app", controlHandler.Delete)
+	router.POST("/app/mute", controlHandler.Mute)
+	router.POST("/app/unmute", controlHandler.UnMute)
+	router.POST("/app/add/:app", controlHandler.Add)
+	router.DELETE("/app/remove/:app", controlHandler.Delete)
 	router.GET("/app/list", controlHandler.List)
 
 	wg := sync.WaitGroup{}
