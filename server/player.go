@@ -98,3 +98,13 @@ func (p *PlayerHandler) Pause(w http.ResponseWriter, r *http.Request, ps httprou
 	output, _ := json.Marshal(s)
 	w.Write(output)
 }
+
+// Delete - will remove song
+func (p *PlayerHandler) Delete(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	id := ps.ByName("id")
+
+	p.SongList.Delete(id)
+
+	output, _ := json.Marshal(p.SongList.GetAll())
+	w.Write(output)
+}

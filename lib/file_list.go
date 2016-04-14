@@ -37,6 +37,10 @@ func (l *FileList) Find(id string) (FileListItem, error) {
 	return s, nil
 }
 
+func (l *FileList) Delete(id string) {
+	delete(l.list, id)
+}
+
 // FindByFile - finds if we already have this file prepared
 func (l *FileList) FindByFile(filename string) FileListItem {
 	for _, s := range l.list {
