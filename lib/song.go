@@ -92,6 +92,7 @@ func (s *Song) Play() {
 				s.bytesPlayed += int64(size)
 			}
 		}
+		s.bytesPlayed = 0
 	}()
 }
 
