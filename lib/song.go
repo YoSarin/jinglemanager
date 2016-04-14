@@ -12,15 +12,6 @@ import (
 	"os"
 )
 
-// LogI - intrface for logger
-type LogI interface {
-	Info(string)
-	Warning(string)
-	Error(string)
-	Debug(string)
-	Notice(string)
-}
-
 // Song - queue item containing info about playing sound
 type Song struct {
 	id           string

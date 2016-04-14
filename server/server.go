@@ -3,7 +3,6 @@ package server
 import (
 	"fmt"
 	"github.com/julienschmidt/httprouter"
-	"github.com/martin-reznik/logger"
 	"html/template"
 	"io/ioutil"
 	"net/http"
@@ -11,7 +10,7 @@ import (
 
 // HTTPHandler - handler for serving httpPages
 type HTTPHandler struct {
-	Logger *logger.Log
+	Logger LogI
 }
 
 // IndexData - nope yet
@@ -36,7 +35,7 @@ func (i *HTTPHandler) Index(w http.ResponseWriter, r *http.Request, ps httproute
 
 // FileProxyHandler - struct handling file returns from server
 type FileProxyHandler struct {
-	Logger *logger.Log
+	Logger LogI
 }
 
 // Static - handler for static content

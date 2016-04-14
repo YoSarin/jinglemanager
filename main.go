@@ -19,6 +19,7 @@ func main() {
 	httpHandler := server.HTTPHandler{Logger: log}
 	fileHandler := server.FileProxyHandler{Logger: log}
 	playerHandler := server.PlayerHandler{Logger: log, SongList: lib.NewFileList()}
+	controlHandler := server.ControlHandler{Logger: log, Player: lib.NewController(log)}
 
 	router := httprouter.New()
 	router.GET("/", httpHandler.Index)
@@ -32,6 +33,12 @@ func main() {
 	router.POST("/track/stop/:id", playerHandler.Stop)
 	router.POST("/track/pause/:id", playerHandler.Pause)
 	router.GET("/track/list", playerHandler.List)
+
+	router.GET("/app/mute", controlHandler.Mute)
+	router.GET("/app/unmute", controlHandler.UnMute)
+	router.GET("/app/add/:app", controlHandler.Add)
+	router.GET("/app/remove/:app", controlHandler.Delete)
+	router.GET("/app/list", controlHandler.List)
 
 	wg := sync.WaitGroup{}
 	wg.Add(1)

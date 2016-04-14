@@ -4,13 +4,12 @@ import (
 	"encoding/json"
 	"github.com/julienschmidt/httprouter"
 	"github.com/martin-reznik/jinglemanager/lib"
-	"github.com/martin-reznik/logger"
 	"net/http"
 )
 
 // PlayerHandler - player handler
 type PlayerHandler struct {
-	Logger   *logger.Log
+	Logger   LogI
 	SongList *lib.FileList
 }
 
