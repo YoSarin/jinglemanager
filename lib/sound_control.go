@@ -1,5 +1,3 @@
-// +build windows
-
 package lib
 
 import (
@@ -17,6 +15,7 @@ type Controller struct {
 type App struct {
 	Name   string
 	Volume float32
+    specificData interface{}
 }
 
 func NewController(logger LogI) *Controller {
@@ -30,6 +29,7 @@ func NewController(logger LogI) *Controller {
 }
 
 func (c *Controller) MuteApps() {
+    c.refresh()
 	for i := 0; i < c.steps; i++ {
 		level := float32(float32(c.TargetLoudVolume)-(float32(i)*float32(c.TargetLoudVolume-c.TargetSilentVolume)/float32(c.steps))) / 100.0
 		for _, app := range c.appList {
@@ -43,6 +43,7 @@ func (c *Controller) MuteApps() {
 }
 
 func (c *Controller) UnMuteApps() {
+    c.refresh()
 	for i := 0; i < c.steps; i++ {
 		level := float32(float32(c.TargetSilentVolume)+(float32(i)*float32(c.TargetLoudVolume-c.TargetSilentVolume)/float32(c.steps))) / 100.0
 		for _, app := range c.appList {
@@ -56,7 +57,9 @@ func (c *Controller) UnMuteApps() {
 }
 
 func (c *Controller) Add(appname string) {
-	c.appList[appname] = &App{appname, 1.0}
+    a := &App{appname, 1.0, nil}
+    a.platformSpecificStuff()
+	c.appList[appname] = a
 }
 
 func (c *Controller) Remove(appname string) {
@@ -65,4 +68,10 @@ func (c *Controller) Remove(appname string) {
 
 func (c *Controller) List() map[string]*App {
 	return c.appList
+}
+
+func (c *Controller) refresh() {
+    for _, app := range c.appList {
+        app.refresh()
+    }
 }
