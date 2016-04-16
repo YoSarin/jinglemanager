@@ -69,6 +69,9 @@ func (s *Song) IsPlaying() bool {
 
 // Play - plays song
 func (s *Song) Play() {
+	if s.IsPlaying() {
+		return
+	}
 	go func() {
 		s.playing = true
 		defer s.playbackDone()
@@ -105,6 +108,10 @@ func (s *Song) Stop() {
 
 // Pause - pauses playing, so it can be resumed from the point where it was stopped
 func (s *Song) Pause() {
+	if !s.IsPlaying() {
+		return
+	}
+
 	s.stopPlayback <- true
 	// wait for confirmation that playback has stopped
 	_ = <-s.done

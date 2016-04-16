@@ -36,7 +36,7 @@ func (p *PlayerHandler) Play(w http.ResponseWriter, r *http.Request, ps httprout
 	id := ps.ByName("id")
 	f, err := p.SongList.Find(id)
 	s, ok := f.(SongI)
-	if err != nil || !ok || s.IsPlaying() {
+	if err != nil || !ok {
 		p.Logger.Error(err.Error())
 		http.NotFound(w, r)
 		return
@@ -61,7 +61,7 @@ func (p *PlayerHandler) Stop(w http.ResponseWriter, r *http.Request, ps httprout
 
 	f, err := p.SongList.Find(id)
 	s, ok := f.(SongI)
-	if err != nil || !ok || !s.IsPlaying() {
+	if err != nil || !ok {
 		http.NotFound(w, r)
 		return
 	}
@@ -77,7 +77,7 @@ func (p *PlayerHandler) Pause(w http.ResponseWriter, r *http.Request, ps httprou
 
 	f, err := p.SongList.Find(id)
 	s, ok := f.(SongI)
-	if err != nil || !ok || !s.IsPlaying() {
+	if err != nil || !ok {
 		http.NotFound(w, r)
 		return
 	}
