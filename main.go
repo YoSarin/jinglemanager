@@ -16,10 +16,16 @@ func main() {
 	log.LogSeverity[logger.DEBUG] = true
 	defer log.Close()
 
+	songList := lib.NewFileList()
+	soundControl := lib.NewSoundController(log)
+
+	lib.Load(log, songList, soundControl, "last.yml")
+
 	httpHandler := server.HTTPHandler{Logger: log}
 	fileHandler := server.FileProxyHandler{Logger: log}
-	playerHandler := server.PlayerHandler{Logger: log, SongList: lib.NewFileList()}
-	controlHandler := server.ControlHandler{Logger: log, Player: lib.NewController(log)}
+	playerHandler := server.PlayerHandler{Logger: log, SongList: songList}
+	controlHandler := server.SoundControlHandler{Logger: log, SoundControl: soundControl}
+	storageHandler := server.StorageHandler{Logger: log, SongList: songList, SoundControl: soundControl}
 
 	router := httprouter.New()
 	router.GET("/", httpHandler.Index)
@@ -40,6 +46,9 @@ func main() {
 	router.POST("/app/add/:app", controlHandler.Add)
 	router.DELETE("/app/remove/:app", controlHandler.Delete)
 	router.GET("/app/list", controlHandler.List)
+
+	router.GET("/save/:name", storageHandler.Save)
+	router.GET("/load/:name", storageHandler.Load)
 
 	wg := sync.WaitGroup{}
 	wg.Add(1)

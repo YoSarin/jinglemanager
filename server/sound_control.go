@@ -7,34 +7,40 @@ import (
 	"net/http"
 )
 
-type ControlHandler struct {
-	Logger LogI
-	Player *lib.Controller
+// SoundControlHandler - handler to controll sounds
+type SoundControlHandler struct {
+	Logger       LogI
+	SoundControl *lib.SoundController
 }
 
-func (h *ControlHandler) Mute(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	h.Player.MuteApps()
+// Mute - will mute all apps
+func (h *SoundControlHandler) Mute(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	h.SoundControl.MuteApps()
 }
 
-func (h *ControlHandler) UnMute(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	h.Player.UnMuteApps()
+// UnMute - will unmute all the apps
+func (h *SoundControlHandler) UnMute(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	h.SoundControl.UnMuteApps()
 }
 
-func (h *ControlHandler) List(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	out, _ := json.Marshal(h.Player.List())
+// List - will list all the apps
+func (h *SoundControlHandler) List(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	out, _ := json.Marshal(h.SoundControl.List())
 	w.Write(out)
 }
 
-func (h *ControlHandler) Add(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+// Add - will add new app to list
+func (h *SoundControlHandler) Add(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	app := ps.ByName("app")
-	h.Player.Add(app)
-	out, _ := json.Marshal(h.Player.List())
+	h.SoundControl.Add(app)
+	out, _ := json.Marshal(h.SoundControl.List())
 	w.Write(out)
 }
 
-func (h *ControlHandler) Delete(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+// Delete - wil remove app from list
+func (h *SoundControlHandler) Delete(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	app := ps.ByName("app")
-	h.Player.Remove(app)
-	out, _ := json.Marshal(h.Player.List())
+	h.SoundControl.Remove(app)
+	out, _ := json.Marshal(h.SoundControl.List())
 	w.Write(out)
 }

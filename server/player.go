@@ -26,21 +26,7 @@ type SongI interface {
 // Add - will add song
 func (p *PlayerHandler) Add(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	songFile := r.URL.Query().Get("filename")
-	f := p.SongList.FindByFile(songFile)
-	if f != nil {
-		s, _ := f.(SongI)
-		output, _ := json.Marshal(s)
-		w.Write(output)
-		return
-	}
-	s, err := lib.NewSong(songFile, p.Logger)
-	if err != nil {
-		p.Logger.Error(err.Error())
-		http.NotFound(w, r)
-		return
-	}
-	p.SongList.Add(s)
-
+	p.SongList.AddUniq(songFile, p.Logger)
 	output, _ := json.Marshal(p.SongList.GetAll())
 	w.Write(output)
 }

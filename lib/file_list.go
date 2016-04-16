@@ -28,6 +28,19 @@ func (l *FileList) Add(i FileListItem) {
 	l.list[i.ID()] = i
 }
 
+// AddUniq - will add unique value
+func (l *FileList) AddUniq(filename string, log LogI) (bool, error) {
+	f := l.FindByFile(filename)
+	if f == nil {
+		s, err := NewSong(filename, log)
+		if err != nil {
+			return false, err
+		}
+		l.Add(s)
+	}
+	return true, nil
+}
+
 // Find - finds and returns item by id
 func (l *FileList) Find(id string) (FileListItem, error) {
 	s, ok := l.list[id]
@@ -37,6 +50,18 @@ func (l *FileList) Find(id string) (FileListItem, error) {
 	return s, nil
 }
 
+// FileNames - will return list of all songs file names
+func (l *FileList) FileNames() []string {
+	out := make([]string, len(l.list))
+	i := 0
+	for _, val := range l.list {
+		out[i] = val.FileName()
+		i++
+	}
+	return out
+}
+
+// Delete - will delete item from list
 func (l *FileList) Delete(id string) {
 	delete(l.list, id)
 }
