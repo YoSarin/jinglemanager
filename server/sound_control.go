@@ -9,23 +9,22 @@ import (
 
 // SoundControlHandler - handler to controll sounds
 type SoundControlHandler struct {
-	Logger       LogI
-	SoundControl *lib.SoundController
+	Context *lib.Context
 }
 
 // Mute - will mute all apps
 func (h *SoundControlHandler) Mute(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	h.SoundControl.MuteApps()
+	h.Context.Sound.MuteApps()
 }
 
 // UnMute - will unmute all the apps
 func (h *SoundControlHandler) UnMute(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	h.SoundControl.UnMuteApps()
+	h.Context.Sound.UnMuteApps()
 }
 
 // List - will list all the apps
 func (h *SoundControlHandler) List(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	out, _ := json.Marshal(h.SoundControl.List())
+	out, _ := json.Marshal(h.Context.Sound.List())
 	w.Write(out)
 }
 
@@ -33,15 +32,15 @@ func (h *SoundControlHandler) List(w http.ResponseWriter, r *http.Request, ps ht
 func (h *SoundControlHandler) Add(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	r.ParseForm()
 	app := r.FormValue("name")
-	h.SoundControl.Add(app)
-	out, _ := json.Marshal(h.SoundControl.List())
+	h.Context.Sound.Add(app)
+	out, _ := json.Marshal(h.Context.Sound.List())
 	w.Write(out)
 }
 
 // Delete - wil remove app from list
 func (h *SoundControlHandler) Delete(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	id := ps.ByName("id")
-	h.SoundControl.Remove(id)
-	out, _ := json.Marshal(h.SoundControl.List())
+	h.Context.Sound.Remove(id)
+	out, _ := json.Marshal(h.Context.Sound.List())
 	w.Write(out)
 }

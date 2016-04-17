@@ -11,6 +11,8 @@ var (
 	// ChannelChange - Channel should contain or change events
 	ChannelChange = channel("change")
 
+	// EventTypeCleanup - event type related to total cleanup
+	EventTypeCleanup = eventType("cleanup")
 	// EventTypeVolumeChange - event type related to apps volume change
 	EventTypeVolumeChange = eventType("volume_changed")
 	// EventTypeSongChange - event type related to song change

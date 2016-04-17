@@ -9,7 +9,8 @@ var Handler = {
     "song_removed"   : songRemove,
     "app_added"      : appAdd,
     "app_removed"    : appRemove,
-    "volume_changed" : volumeChange
+    "volume_changed" : volumeChange,
+    "cleanup"        : load
 }
 
 var socket;

@@ -3,6 +3,7 @@ package server
 import (
 	"fmt"
 	"github.com/julienschmidt/httprouter"
+	"github.com/martin-reznik/jinglemanager/lib"
 	"html/template"
 	"io/ioutil"
 	"net/http"
@@ -10,7 +11,7 @@ import (
 
 // HTTPHandler - handler for serving httpPages
 type HTTPHandler struct {
-	Logger LogI
+	Context *lib.Context
 }
 
 // IndexData - nope yet
@@ -26,7 +27,7 @@ func (i *HTTPHandler) Index(w http.ResponseWriter, r *http.Request, ps httproute
 	}
 	t, err := template.ParseFiles("static/html/index.html")
 	if err != nil {
-		i.Logger.Error(err.Error())
+		i.Context.Log.Error(err.Error())
 		http.Error(w, "Internal Server Error", 500)
 		return
 	}
@@ -35,7 +36,7 @@ func (i *HTTPHandler) Index(w http.ResponseWriter, r *http.Request, ps httproute
 
 // FileProxyHandler - struct handling file returns from server
 type FileProxyHandler struct {
-	Logger LogI
+	Context *lib.Context
 }
 
 // Static - handler for static content
@@ -43,7 +44,7 @@ func (f *FileProxyHandler) Static(w http.ResponseWriter, r *http.Request, ps htt
 	path := fmt.Sprintf("static%v", r.URL.Path)
 	data, err := ioutil.ReadFile(path)
 	if err != nil {
-		f.Logger.Error(err.Error())
+		f.Context.Log.Error(err.Error())
 		http.NotFound(w, r)
 		return
 	}

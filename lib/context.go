@@ -12,4 +12,5 @@ func (c *Context) cleanup() {
 	c.Songs = NewFileList()
 	c.Sound = NewSoundController(c.Log)
 	c.Tournament = NewTournament("")
+	ChannelChange.Emit(EventTypeCleanup, struct{}{})
 }

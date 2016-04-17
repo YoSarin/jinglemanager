@@ -35,10 +35,10 @@ func main() {
 
 	lib.LoadFromFile(Ctx, "last.yml")
 
-	httpHandler := server.HTTPHandler{Logger: Ctx.Log}
-	fileHandler := server.FileProxyHandler{Logger: Ctx.Log}
-	playerHandler := server.PlayerHandler{Logger: Ctx.Log, SongList: Ctx.Songs}
-	controlHandler := server.SoundControlHandler{Logger: Ctx.Log, SoundControl: Ctx.Sound}
+	httpHandler := server.HTTPHandler{Context: Ctx}
+	fileHandler := server.FileProxyHandler{Context: Ctx}
+	playerHandler := server.PlayerHandler{Context: Ctx}
+	controlHandler := server.SoundControlHandler{Context: Ctx}
 	storageHandler := server.StorageHandler{Context: Ctx}
 	socketHandler := server.SocketHandler{Context: Ctx, Upgrader: &websocket.Upgrader{}}
 

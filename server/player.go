@@ -9,8 +9,7 @@ import (
 
 // PlayerHandler - player handler
 type PlayerHandler struct {
-	Logger   LogI
-	SongList *lib.FileList
+	Context *lib.Context
 }
 
 // SongI - interface used to play songs
@@ -27,30 +26,30 @@ type SongI interface {
 func (p *PlayerHandler) Add(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	r.ParseForm()
 	songFile := r.FormValue("filename")
-	p.SongList.AddUniq(songFile, p.Logger)
-	output, _ := json.Marshal(p.SongList.GetAll())
+	p.Context.Songs.AddUniq(songFile, p.Context.Log)
+	output, _ := json.Marshal(p.Context.Songs.GetAll())
 	w.Write(output)
 }
 
 // Play - will play song
 func (p *PlayerHandler) Play(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	id := ps.ByName("id")
-	f, err := p.SongList.Find(id)
+	f, err := p.Context.Songs.Find(id)
 	s, ok := f.(SongI)
 	if err != nil || !ok {
-		p.Logger.Error(err.Error())
+		p.Context.Log.Error(err.Error())
 		http.NotFound(w, r)
 		return
 	}
 	s.Play()
 
-	output, _ := json.Marshal(p.SongList.GetAll())
+	output, _ := json.Marshal(p.Context.Songs.GetAll())
 	w.Write(output)
 }
 
 // List - will list all actually playing songs
 func (p *PlayerHandler) List(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	list := p.SongList.GetAll()
+	list := p.Context.Songs.GetAll()
 
 	output, _ := json.Marshal(list)
 	w.Write(output)
@@ -60,7 +59,7 @@ func (p *PlayerHandler) List(w http.ResponseWriter, r *http.Request, ps httprout
 func (p *PlayerHandler) Stop(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	id := ps.ByName("id")
 
-	f, err := p.SongList.Find(id)
+	f, err := p.Context.Songs.Find(id)
 	s, ok := f.(SongI)
 	if err != nil || !ok {
 		http.NotFound(w, r)
@@ -68,7 +67,7 @@ func (p *PlayerHandler) Stop(w http.ResponseWriter, r *http.Request, ps httprout
 	}
 	s.Stop()
 
-	output, _ := json.Marshal(p.SongList.GetAll())
+	output, _ := json.Marshal(p.Context.Songs.GetAll())
 	w.Write(output)
 }
 
@@ -76,7 +75,7 @@ func (p *PlayerHandler) Stop(w http.ResponseWriter, r *http.Request, ps httprout
 func (p *PlayerHandler) Pause(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	id := ps.ByName("id")
 
-	f, err := p.SongList.Find(id)
+	f, err := p.Context.Songs.Find(id)
 	s, ok := f.(SongI)
 	if err != nil || !ok {
 		http.NotFound(w, r)
@@ -84,7 +83,7 @@ func (p *PlayerHandler) Pause(w http.ResponseWriter, r *http.Request, ps httprou
 	}
 	s.Pause()
 
-	output, _ := json.Marshal(p.SongList.GetAll())
+	output, _ := json.Marshal(p.Context.Songs.GetAll())
 	w.Write(output)
 }
 
@@ -92,7 +91,7 @@ func (p *PlayerHandler) Pause(w http.ResponseWriter, r *http.Request, ps httprou
 func (p *PlayerHandler) Delete(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	id := ps.ByName("id")
 
-	f, err := p.SongList.Find(id)
+	f, err := p.Context.Songs.Find(id)
 	s, ok := f.(SongI)
 	if err != nil || !ok {
 		http.NotFound(w, r)
@@ -103,8 +102,8 @@ func (p *PlayerHandler) Delete(w http.ResponseWriter, r *http.Request, ps httpro
 		s.Stop()
 	}
 
-	p.SongList.Delete(id)
+	p.Context.Songs.Delete(id)
 
-	output, _ := json.Marshal(p.SongList.GetAll())
+	output, _ := json.Marshal(p.Context.Songs.GetAll())
 	w.Write(output)
 }
