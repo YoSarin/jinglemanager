@@ -5,7 +5,6 @@ import (
 	"github.com/julienschmidt/httprouter"
 	"github.com/martin-reznik/jinglemanager/lib"
 	"net/http"
-	"time"
 )
 
 // SocketHandler - struct for WebSocket handling
@@ -24,20 +23,16 @@ func (h *SocketHandler) HandleSocket(w http.ResponseWriter, r *http.Request, ps 
 		return
 	}
 	defer c.Close()
-	ticker := time.NewTicker(5 * time.Second)
+
+	changeListener, deferFunc := lib.ChannelChange.Subscribe()
+	defer deferFunc()
+
 	for {
 		select {
-		case m := <-h.Context.Changes:
-			h.Context.Log.Info("write")
+		case m := <-changeListener:
 			err := c.WriteJSON(m)
 			if err != nil {
-				h.Context.Log.Error("Write error: " + err.Error())
-				return
-			}
-		case <-ticker.C:
-			err := c.WriteJSON(ping{})
-			if err != nil {
-				h.Context.Log.Error("Ping error: " + err.Error())
+				h.Context.Log.Error("Write error closing sock: " + err.Error())
 				return
 			}
 		}

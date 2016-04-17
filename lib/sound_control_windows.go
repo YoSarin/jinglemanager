@@ -15,10 +15,10 @@ func (a *App) setAppVolume(level float32) bool {
 	return true
 }
 
-func (a *App) platformSpecificStuff(){
-    // Nothing to do, bcs we have nircmd
+func (a *App) platformSpecificStuff() {
+	// Nothing to do, bcs we have nircmd
 }
 
 func (a *App) refresh() {
-    // nope
+	// nope
 }

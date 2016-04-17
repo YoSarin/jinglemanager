@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"github.com/gorilla/websocket"
 	"github.com/julienschmidt/httprouter"
 	"github.com/martin-reznik/jinglemanager/lib"
@@ -14,15 +15,16 @@ import (
 )
 
 func main() {
+	flagDoNotOpenBrowser := flag.Bool("no-browser", false, "do not open browser")
+	flag.Parse()
 
 	log := logger.NewLog(func(line *logger.LogLine) { line.Print() })
 	log.LogSeverity[logger.DEBUG] = true
 
 	Ctx := &lib.Context{
-		Log:     log,
-		Songs:   lib.NewFileList(),
-		Sound:   lib.NewSoundController(log),
-		Changes: make(chan interface{}),
+		Log:   log,
+		Songs: lib.NewFileList(),
+		Sound: lib.NewSoundController(log),
 	}
 
 	defer func() {
@@ -86,6 +88,8 @@ func main() {
 
 	log.Info("Server is up and running, open 'http://localhost:8080' in your browser")
 
-	open.Start("http://localhost:8080")
+	if !*flagDoNotOpenBrowser {
+		open.Start("http://localhost:8080")
+	}
 	wg.Wait()
 }

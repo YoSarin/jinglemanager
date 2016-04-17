@@ -2,10 +2,9 @@ package lib
 
 // Context - context containing app information
 type Context struct {
-	Log     LogI
-	Songs   *FileList
-	Sound   *SoundController
-	Changes chan interface{}
+	Log   LogI
+	Songs *FileList
+	Sound *SoundController
 }
 
 func (c *Context) cleanup() {

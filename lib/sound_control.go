@@ -43,6 +43,7 @@ func (c *SoundController) MuteApps() {
 			go func(app *App) {
 				app.setAppVolume(level)
 				app.Volume = level
+				ChannelChange.Emit(EventTypeVolumeChange, app)
 			}(app)
 		}
 		time.Sleep(100 * time.Millisecond)
@@ -58,6 +59,7 @@ func (c *SoundController) UnMuteApps() {
 			go func(app *App) {
 				app.setAppVolume(level)
 				app.Volume = level
+				ChannelChange.Emit(EventTypeVolumeChange, app)
 			}(app)
 		}
 		time.Sleep(100 * time.Millisecond)

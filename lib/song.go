@@ -72,8 +72,10 @@ func (s *Song) Play() {
 	if s.IsPlaying() {
 		return
 	}
+	s.playing = true
+	ChannelChange.Emit(EventTypeSongChange, s)
+
 	go func() {
-		s.playing = true
 		defer s.playbackDone()
 
 		ao.Initialize()
@@ -81,7 +83,7 @@ func (s *Song) Play() {
 		dev := ao.NewLiveDevice(s.ao)
 		defer dev.Close()
 
-		bufSize := int64(1024)
+		bufSize := int64(s.bytesTotal / 100)
 		for step := int64(s.bytesPlayed / bufSize); step < s.bytesTotal/bufSize; step++ {
 			select {
 			case <-s.stopPlayback:
@@ -94,6 +96,7 @@ func (s *Song) Play() {
 				}
 				s.bytesPlayed += int64(size)
 			}
+			ChannelChange.Emit(EventTypeSongChange, s)
 		}
 		s.bytesPlayed = 0
 	}()
