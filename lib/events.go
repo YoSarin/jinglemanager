@@ -11,6 +11,14 @@ var (
 	EventTypeVolumeChange = eventType("volume_change")
 	// EventTypeSongChange - event type related to song change
 	EventTypeSongChange = eventType("song_change")
+	// EventTypeSongAdded - event type related to song change
+	EventTypeSongAdded = eventType("song_added")
+	// EventTypeSongRemoved - event type related to song change
+	EventTypeSongRemoved = eventType("song_removed")
+	// EventTypeAppAdded - event type related to app list change
+	EventTypeAppAdded = eventType("app_added")
+	// EventTypeAppRemoved - event type related to app list change
+	EventTypeAppRemoved = eventType("app_removed")
 )
 
 type event struct {

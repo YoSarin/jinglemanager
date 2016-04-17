@@ -72,6 +72,7 @@ func (c *SoundController) Add(appname string) {
 	a := &App{id, appname, 1.0, nil}
 	a.platformSpecificStuff()
 	c.appList[appname] = a
+	ChannelChange.Emit(EventTypeAppAdded, a)
 }
 
 // AddUniq - Will add an application to controller
@@ -93,6 +94,7 @@ func (c *SoundController) AppNames() []string {
 
 // Remove - will remove an application from controller
 func (c *SoundController) Remove(appname string) {
+	ChannelChange.Emit(EventTypeAppRemoved, c.appList[appname])
 	delete(c.appList, appname)
 }
 

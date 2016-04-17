@@ -8,6 +8,7 @@ import (
 type FileListItem interface {
 	FileName() string
 	ID() string
+	Remove()
 }
 
 // FileList - List of items
@@ -63,6 +64,7 @@ func (l *FileList) FileNames() []string {
 
 // Delete - will delete item from list
 func (l *FileList) Delete(id string) {
+	l.list[id].Remove()
 	delete(l.list, id)
 }
 

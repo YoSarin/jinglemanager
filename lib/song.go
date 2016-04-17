@@ -44,7 +44,14 @@ func NewSong(filename string, log LogI) (*Song, error) {
 		stopPlayback: make(chan bool, 1),
 		done:         make(chan bool, 1),
 	}
+	ChannelChange.Emit(EventTypeSongAdded, s)
 	return s, nil
+}
+
+// Remove - will trigger actions related to removal of song from File List
+func (s *Song) Remove() {
+	s.Stop()
+	ChannelChange.Emit(EventTypeSongRemoved, s)
 }
 
 // MarshalJSON - will convert song to JSON
