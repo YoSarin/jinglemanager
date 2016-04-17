@@ -3,20 +3,19 @@ package server
 import (
 	"github.com/julienschmidt/httprouter"
 	"github.com/martin-reznik/jinglemanager/lib"
+	"io/ioutil"
 	"net/http"
 )
 
 // StorageHandler - storage handler
 type StorageHandler struct {
-	Logger       LogI
-	SongList     *lib.FileList
-	SoundControl *lib.SoundController
+	Context *lib.Context
 }
 
 // Save - will save data
 func (s *StorageHandler) Save(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	name := ps.ByName("name")
-	out := lib.Save(s.Logger, s.SongList, s.SoundControl, name)
+	out := lib.Save(s.Context)
 	w.Header().Set("Content-type", "application/octet-stream")
 	w.Header().Set("Content-disposition", "attachment; filename="+name+".yml")
 	w.Write(out)
@@ -24,5 +23,15 @@ func (s *StorageHandler) Save(w http.ResponseWriter, r *http.Request, ps httprou
 
 // Load - will load data from specified file
 func (s *StorageHandler) Load(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	lib.Load(s.Logger, s.SongList, s.SoundControl, ps.ByName("name"))
+	file, _, err := r.FormFile("file")
+	if err != nil {
+		s.Context.Log.Error("File upload failed: " + err.Error())
+		http.Error(w, "upload failed", 500)
+		return
+	}
+	defer file.Close()
+	data, err := ioutil.ReadAll(file)
+
+	lib.Load(s.Context, data)
+	http.Redirect(w, r, "/", 302)
 }

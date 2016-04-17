@@ -41,7 +41,6 @@ type FileProxyHandler struct {
 // Static - handler for static content
 func (f *FileProxyHandler) Static(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	path := fmt.Sprintf("static%v", r.URL.Path)
-	f.Logger.Debug(fmt.Sprintf("Path to fetch: %v", path))
 	data, err := ioutil.ReadFile(path)
 	if err != nil {
 		f.Logger.Error(err.Error())

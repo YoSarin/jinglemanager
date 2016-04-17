@@ -1,6 +1,8 @@
 package lib
 
 import (
+	"crypto/md5"
+	"fmt"
 	"time"
 )
 
@@ -15,6 +17,7 @@ type SoundController struct {
 
 // App - contains info about applications which sound should be manipulated
 type App struct {
+	ID           string
 	Name         string
 	Volume       float32
 	specificData interface{}
@@ -34,7 +37,7 @@ func NewSoundController(logger LogI) *SoundController {
 // MuteApps - Will mute all apps in controller
 func (c *SoundController) MuteApps() {
 	c.refresh()
-	for i := 0; i < c.steps; i++ {
+	for i := 0; i <= c.steps; i++ {
 		level := float32(float32(c.TargetLoudVolume)-(float32(i)*float32(c.TargetLoudVolume-c.TargetSilentVolume)/float32(c.steps))) / 100.0
 		for _, app := range c.appList {
 			go func(app *App) {
@@ -49,7 +52,7 @@ func (c *SoundController) MuteApps() {
 // UnMuteApps - Will unmute all apps in controller
 func (c *SoundController) UnMuteApps() {
 	c.refresh()
-	for i := 0; i < c.steps; i++ {
+	for i := 0; i <= c.steps; i++ {
 		level := float32(float32(c.TargetSilentVolume)+(float32(i)*float32(c.TargetLoudVolume-c.TargetSilentVolume)/float32(c.steps))) / 100.0
 		for _, app := range c.appList {
 			go func(app *App) {
@@ -63,7 +66,8 @@ func (c *SoundController) UnMuteApps() {
 
 // Add - Will add an application to controller
 func (c *SoundController) Add(appname string) {
-	a := &App{appname, 1.0, nil}
+	id := fmt.Sprintf("%x", md5.Sum([]byte(appname)))
+	a := &App{id, appname, 1.0, nil}
 	a.platformSpecificStuff()
 	c.appList[appname] = a
 }

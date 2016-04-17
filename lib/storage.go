@@ -1,32 +1,29 @@
 package lib
 
 import (
-	"fmt"
 	"github.com/go-yaml/yaml"
 	"io/ioutil"
 	"os"
 )
 
 type data struct {
-	Name         string
 	Songs        []string
 	Applications []string
 }
 
 // Save - will save data to yaml file
-func Save(l LogI, songs *FileList, apps *SoundController, name string) []byte {
+func Save(c *Context) []byte {
 	d := &data{
-		Name:         name,
-		Songs:        songs.FileNames(),
-		Applications: apps.AppNames(),
+		Songs:        c.Songs.FileNames(),
+		Applications: c.Sound.AppNames(),
 	}
 	out, err := yaml.Marshal(d)
 	if err != nil {
-		l.Error(err.Error())
+		c.Log.Error(err.Error())
 	}
 	f, err := os.Create("last.yml")
 	if err != nil {
-		l.Error(err.Error())
+		c.Log.Error(err.Error())
 	} else {
 		defer f.Close()
 		f.Write(out)
@@ -40,20 +37,33 @@ type addableListI interface {
 }
 
 // Load - will load data from yaml file
-func Load(l LogI, songs addableListI, apps addableListI, name string) {
-	in, err := ioutil.ReadFile(name)
-	if err != nil {
-		l.Error(err.Error())
-		return
-	}
+func Load(c *Context, input []byte) {
+	c.cleanup()
 	d := &data{}
-	fmt.Println(in)
-	yaml.Unmarshal(in, d)
+	yaml.Unmarshal(input, d)
 	for _, val := range d.Songs {
-		fmt.Println("adding: " + val)
-		songs.AddUniq(val, l)
+		c.Log.Debug("adding song: " + val)
+		c.Songs.AddUniq(val, c.Log)
 	}
 	for _, val := range d.Applications {
-		apps.AddUniq(val, l)
+		c.Log.Debug("adding application: " + val)
+		c.Sound.AddUniq(val, c.Log)
 	}
+}
+
+// LoadFromFile - will load data from file
+func LoadFromFile(c *Context, filename string) error {
+	f, err := os.Open(filename)
+	if err != nil {
+		c.Log.Error("File opening error " + filename + ": " + err.Error())
+		return err
+	}
+	defer f.Close()
+	data, err := ioutil.ReadAll(f)
+	if err != nil {
+		c.Log.Error("File read error " + filename + ": " + err.Error())
+		return err
+	}
+	Load(c, data)
+	return nil
 }

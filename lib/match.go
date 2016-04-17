@@ -4,6 +4,7 @@ import (
 	"time"
 )
 
+// Match - struct holds info about matches
 type Match struct {
 	StartsAt time.Time
 	Duration time.Duration

@@ -1,5 +1,15 @@
 $(document).ready(function() {
+    hook();
     load();
+});
+
+var socket = new WebSocket("ws://localhost:8080/socket")
+socket.onmessage = function(evt) {
+    console.log(evt.data);
+}
+
+function hook() {
+    $('a').click(clicker)
 
     $("form#addSong").submit(function () {
         var f = $(this);
@@ -12,11 +22,14 @@ $(document).ready(function() {
         })
         return false;
     });
-});
+}
 
 function load() {
     $.ajax("/track/list", {
         success: function(data, status) { listTracks(data); }
+    });
+    $.ajax("/app/list", {
+        success: function(data, status) { listApps(data); }
     });
 }
 
@@ -37,7 +50,7 @@ function listTracks(data) {
 
                     ).find("a").each(function (k, v) {
                         $(v).prop('onclick', null).off('click');
-                        $(v).click(controlClicker);
+                        $(v).click({callback: listTracks}, clicker);
                     });
                 }
         });
@@ -46,14 +59,52 @@ function listTracks(data) {
     }
 }
 
-function controlClicker() {
-    var href = $(this).attr("href");
+function listApps(data) {
+    try {
+        var data = $.parseJSON(data);
+        $("#apps").empty();
+        $.each(data, function (k, v) {
+            if($("#app-" + v.ID).length == 0) {
+                $("#apps")
+                    .append(
+                        $('<div id="app-' + v.ID + '" class="app"></div>')
+                        .append($('<a class="control" href="/app/delete/' + v.ID + '">delete</a>')).append(' | ')
+                        .append($("<strong>").text(v.Name)).append(" ")
+                        .append($("<small>").text((100 * v.Volume) + "%"))
+                    ).find("a").each(function (k, v) {
+                        $(v).prop('onclick', null).off('click');
+                        $(v).click({callback: listApps}, clicker);
+                    });
+                }
+        });
+    } catch (e) {
+        console.log(e);
+    }
+}
+
+function clicker(event) {
+    var callback;
+    try {
+        callback = event.data.callback;
+        if (typeof callback == 'undefined') {
+            callback = defaultCallback;
+        }
+    } catch (e) {
+        console.log(e);
+        callback = defaultCallback;
+    }
     var m = $(this).attr("method");
+    var href = $(this).attr("href")
     $.ajax(href, {
         method: (m ? m : "POST"),
-        success: function(data, status) { listTracks(data); },
+        success: function(data, status) { callback(data); },
         complete: function() { console.log("complete"); },
         error: function() { console.log("error"); }
     })
     return false;
+}
+
+
+function defaultCallback(data) {
+    console.log(data);
 }
