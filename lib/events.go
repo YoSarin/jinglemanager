@@ -1,5 +1,9 @@
 package lib
 
+import (
+	"fmt"
+)
+
 type channel string
 type eventType string
 
@@ -51,6 +55,13 @@ func (c channel) Emit(evType eventType, data interface{}) {
 		Data interface{}
 	}{Type: evType, Data: data}
 	for _, ch := range listeners[c] {
-		ch <- ev
+		go func(ch chan interface{}, ev interface{}) {
+			defer func() {
+				if r := recover(); r != nil {
+					fmt.Println("Listener gone", r)
+				}
+			}()
+			ch <- ev
+		}(ch, ev)
 	}
 }

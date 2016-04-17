@@ -90,7 +90,9 @@ func (s *Song) Play() {
 		dev := ao.NewLiveDevice(s.ao)
 		defer dev.Close()
 
-		bufSize := int64(s.bytesTotal / 100)
+		reportingTreshold := int64(s.bytesTotal / 100)
+		lastlyReported := int64(0)
+		bufSize := int64(1024)
 		for step := int64(s.bytesPlayed / bufSize); step < s.bytesTotal/bufSize; step++ {
 			select {
 			case <-s.stopPlayback:
@@ -102,10 +104,15 @@ func (s *Song) Play() {
 					return
 				}
 				s.bytesPlayed += int64(size)
+				if lastlyReported+reportingTreshold < s.bytesPlayed {
+					ChannelChange.Emit(EventTypeSongChange, s)
+					lastlyReported = s.bytesPlayed
+				}
 			}
-			ChannelChange.Emit(EventTypeSongChange, s)
 		}
+		s.playing = false
 		s.bytesPlayed = 0
+		ChannelChange.Emit(EventTypeSongChange, s)
 	}()
 }
 
@@ -114,6 +121,7 @@ func (s *Song) Stop() {
 	s.Pause()
 	// reset where we were in song to 0
 	s.bytesPlayed = 0
+	ChannelChange.Emit(EventTypeSongChange, s)
 }
 
 // Pause - pauses playing, so it can be resumed from the point where it was stopped
@@ -125,6 +133,7 @@ func (s *Song) Pause() {
 	s.stopPlayback <- true
 	// wait for confirmation that playback has stopped
 	_ = <-s.done
+	ChannelChange.Emit(EventTypeSongChange, s)
 }
 
 // Position - percentage of file played (based on size)

@@ -71,7 +71,7 @@ func (c *SoundController) Add(appname string) {
 	id := fmt.Sprintf("%x", md5.Sum([]byte(appname)))
 	a := &App{id, appname, 1.0, nil}
 	a.platformSpecificStuff()
-	c.appList[appname] = a
+	c.appList[id] = a
 	ChannelChange.Emit(EventTypeAppAdded, a)
 }
 
@@ -93,9 +93,9 @@ func (c *SoundController) AppNames() []string {
 }
 
 // Remove - will remove an application from controller
-func (c *SoundController) Remove(appname string) {
-	ChannelChange.Emit(EventTypeAppRemoved, c.appList[appname])
-	delete(c.appList, appname)
+func (c *SoundController) Remove(id string) {
+	ChannelChange.Emit(EventTypeAppRemoved, c.appList[id])
+	delete(c.appList, id)
 }
 
 // List - will return list of all applications in controller
