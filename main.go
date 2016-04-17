@@ -25,7 +25,7 @@ func main() {
 		Log:        log,
 		Songs:      lib.NewFileList(),
 		Sound:      lib.NewSoundController(log),
-		Tournament: lib.NewTournament("Turnaj"),
+		Tournament: lib.NewTournament(""),
 	}
 
 	defer func() {

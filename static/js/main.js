@@ -16,6 +16,7 @@ var socket;
 connectSocket()
 
 function connectSocket() {
+    console.log("try");
     socket = new WebSocket("ws://localhost:8080/socket");
     socket.onmessage = function(evt) {
         try {
@@ -31,11 +32,7 @@ function connectSocket() {
         }
     }
     socket.onclose = function(evt) {
-        connectSocket();
-    }
-    socket.onerror = function(evt) {
         setTimeout(function () {
-            socket.close();
             connectSocket();
         }, 5000);
     }

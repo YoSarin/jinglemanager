@@ -11,4 +11,5 @@ type Context struct {
 func (c *Context) cleanup() {
 	c.Songs = NewFileList()
 	c.Sound = NewSoundController(c.Log)
+	c.Tournament = NewTournament("")
 }
