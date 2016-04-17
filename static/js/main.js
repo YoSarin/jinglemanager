@@ -4,38 +4,53 @@ $(document).ready(function() {
 });
 
 var Handler = {
-    "song_change"  : songChange,
-    "song_added"   : songAdd,
-    "song_removed" : songRemove,
-    "app_added"    : appAdd,
-    "app_removed"  : appRemove
+    "song_changed"   : songChange,
+    "song_added"     : songAdd,
+    "song_removed"   : songRemove,
+    "app_added"      : appAdd,
+    "app_removed"    : appRemove,
+    "volume_changed" : volumeChange
 }
 
-var socket = new WebSocket("ws://localhost:8080/socket")
-socket.onmessage = function(evt) {
-    try {
-        var data = $.parseJSON(evt.data);
-        if (typeof Handler[data.Type] == 'undefined') {
-            console.warn(data.Type, "Not implemented")
-            return;
+var socket;
+connectSocket()
+
+function connectSocket() {
+    socket = new WebSocket("ws://localhost:8080/socket");
+    socket.onmessage = function(evt) {
+        try {
+            var data = $.parseJSON(evt.data);
+            if (typeof Handler[data.Type] == 'undefined') {
+                console.warn(data.Type, "Not implemented");
+                return;
+            }
+            Handler[data.Type](data.Data);
+        } catch (e) {
+            console.error(e);
+            console.info(evt.data);
         }
-        Handler[data.Type](data.Data);
-    } catch (e) {
-        console.error(e);
-        console.info(evt.data);
+    }
+    socket.onclose = function(evt) {
+        connectSocket();
+    }
+    socket.onerror = function(evt) {
+        setTimeout(function () {
+            socket.close();
+            connectSocket();
+        }, 5000);
     }
 }
 
 function hook() {
-    $('a').click(clicker)
+    $('a').click(clicker);
 
-    $("form#addSong").submit(function () {
+    $("form.ajax").submit(function () {
         var f = $(this);
-        console.log(f.attr("method"));
-        $.ajax("/track/add?filename=" + encodeURIComponent(f.find("input[name=filename]").val()), {
-            method: "POST",
-            success: function(data, status) { listTracks(data); },
-            complete: function() { console.log("complete"); },
+        $.ajax(f.attr("action"), {
+            method: f.attr("method"),
+            data: f.serialize(),
+            success: function(data, status) {  },
+            complete: function() {  },
             error: function() { console.log("error"); }
         })
         return false;
@@ -87,7 +102,7 @@ function appAdd(app) {
             $('<div id="app-' + app.ID + '" class="app"></div>')
             .append($('<a class="control" method="delete" href="/app/delete/' + app.ID + '">delete</a>')).append(' | ')
             .append($("<strong>").text(app.Name)).append(" ")
-            .append($("<small>").text((100 * app.Volume) + "%"))
+            .append($('<small class="state">').text(Math.round(100 * app.Volume) + "%"))
         ).find("a").each(function (k, v) {
             $(v).prop('onclick', null).off('click');
             $(v).click(clicker);
@@ -99,7 +114,13 @@ function appRemove(app) {
 }
 
 function appChange(app) {
-    
+
+}
+
+function volumeChange(app) {
+    $("#app-" + app.ID).each(function () {
+        $(this).find(".state").text( Math.round(app.Volume * 100) + "%");
+    });
 }
 
 function songAdd(song) {
@@ -124,7 +145,7 @@ function songRemove(song) {
 
 function songChange(song) {
     $("#song-" + song.ID).each(function () {
-        $(this).find('.state').text((song.IsPlaying ? "hraje" : "nehraje") + " " + Math.round(song.Position * 100) + " %");
+        $(this).find('.state').text((song.IsPlaying ? "hraje" : "nehraje") + " " + Math.round(song.Position * 100) + "%");
     });
 }
 
@@ -137,12 +158,16 @@ function clicker(event) {
     }
     var m = $(this).attr("method");
     var href = $(this).attr("href")
-    $.ajax(href, {
-        method: (m ? m : "POST"),
-        success: function(data, status) { callback(data); },
-        complete: function() { console.log("complete"); },
-        error: function() { console.log("error"); }
-    })
+    if (m == "download") {
+        $('iframe#downloader').attr("src", href);
+    } else {
+        $.ajax(href, {
+            method: (m ? m : "POST"),
+            success: function(data, status) { callback(data); },
+            complete: function() { console.log("complete"); },
+            error: function() { console.log("error"); }
+        });
+    }
     return false;
 }
 

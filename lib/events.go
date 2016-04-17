@@ -12,9 +12,9 @@ var (
 	ChannelChange = channel("change")
 
 	// EventTypeVolumeChange - event type related to apps volume change
-	EventTypeVolumeChange = eventType("volume_change")
+	EventTypeVolumeChange = eventType("volume_changed")
 	// EventTypeSongChange - event type related to song change
-	EventTypeSongChange = eventType("song_change")
+	EventTypeSongChange = eventType("song_changed")
 	// EventTypeSongAdded - event type related to song change
 	EventTypeSongAdded = eventType("song_added")
 	// EventTypeSongRemoved - event type related to song change

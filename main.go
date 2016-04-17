@@ -22,9 +22,10 @@ func main() {
 	log.LogSeverity[logger.DEBUG] = true
 
 	Ctx := &lib.Context{
-		Log:   log,
-		Songs: lib.NewFileList(),
-		Sound: lib.NewSoundController(log),
+		Log:        log,
+		Songs:      lib.NewFileList(),
+		Sound:      lib.NewSoundController(log),
+		Tournament: lib.NewTournament("Turnaj"),
 	}
 
 	defer func() {
@@ -57,11 +58,11 @@ func main() {
 
 	router.POST("/app/mute", controlHandler.Mute)
 	router.POST("/app/unmute", controlHandler.UnMute)
-	router.POST("/app/add/:app", controlHandler.Add)
-	router.DELETE("/app/delete/:app", controlHandler.Delete)
+	router.POST("/app/add", controlHandler.Add)
+	router.DELETE("/app/delete/:id", controlHandler.Delete)
 	router.GET("/app/list", controlHandler.List)
 
-	router.POST("/save/:name", storageHandler.Save)
+	router.GET("/save", storageHandler.Save)
 	router.POST("/load", storageHandler.Load)
 
 	router.GET("/socket", socketHandler.HandleSocket)

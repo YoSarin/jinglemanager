@@ -7,6 +7,7 @@ import (
 )
 
 type data struct {
+	Tournament   *Tournament
 	Songs        []string
 	Applications []string
 }
@@ -16,6 +17,7 @@ func Save(c *Context) []byte {
 	d := &data{
 		Songs:        c.Songs.FileNames(),
 		Applications: c.Sound.AppNames(),
+		Tournament:   c.Tournament,
 	}
 	out, err := yaml.Marshal(d)
 	if err != nil {
@@ -49,6 +51,7 @@ func Load(c *Context, input []byte) {
 		c.Log.Debug("adding application: " + val)
 		c.Sound.AddUniq(val, c.Log)
 	}
+	c.Tournament = d.Tournament
 }
 
 // LoadFromFile - will load data from file

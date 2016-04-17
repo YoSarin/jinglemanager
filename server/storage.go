@@ -14,7 +14,7 @@ type StorageHandler struct {
 
 // Save - will save data
 func (s *StorageHandler) Save(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	name := ps.ByName("name")
+	name := s.Context.Tournament.Name
 	out := lib.Save(s.Context)
 	w.Header().Set("Content-type", "application/octet-stream")
 	w.Header().Set("Content-disposition", "attachment; filename="+name+".yml")

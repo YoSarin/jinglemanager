@@ -25,7 +25,8 @@ type SongI interface {
 
 // Add - will add song
 func (p *PlayerHandler) Add(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	songFile := r.URL.Query().Get("filename")
+	r.ParseForm()
+	songFile := r.FormValue("filename")
 	p.SongList.AddUniq(songFile, p.Logger)
 	output, _ := json.Marshal(p.SongList.GetAll())
 	w.Write(output)

@@ -31,7 +31,8 @@ func (h *SoundControlHandler) List(w http.ResponseWriter, r *http.Request, ps ht
 
 // Add - will add new app to list
 func (h *SoundControlHandler) Add(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	app := ps.ByName("app")
+	r.ParseForm()
+	app := r.FormValue("name")
 	h.SoundControl.Add(app)
 	out, _ := json.Marshal(h.SoundControl.List())
 	w.Write(out)
@@ -39,8 +40,8 @@ func (h *SoundControlHandler) Add(w http.ResponseWriter, r *http.Request, ps htt
 
 // Delete - wil remove app from list
 func (h *SoundControlHandler) Delete(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	app := ps.ByName("app")
-	h.SoundControl.Remove(app)
+	id := ps.ByName("id")
+	h.SoundControl.Remove(id)
 	out, _ := json.Marshal(h.SoundControl.List())
 	w.Write(out)
 }
