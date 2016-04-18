@@ -18,7 +18,7 @@ connectSocket()
 
 function connectSocket() {
     console.log("try");
-    socket = new WebSocket("ws://localhost:8080/socket");
+    socket = new WebSocket("ws://" + window.location.hostname + ":8080/socket");
     socket.onmessage = function(evt) {
         try {
             var data = $.parseJSON(evt.data);
