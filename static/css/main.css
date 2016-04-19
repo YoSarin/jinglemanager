@@ -1,1 +1,13 @@
 body { color: #88f; }
+
+#logs {
+    height: 75px;
+    font-size: 0.9em;
+    font-family: monospace;
+    overflow: auto;
+}
+
+#logs .debug { color: #ccf; }
+#logs .info { color: #cfc; }
+#logs .warning { color: #f82; }
+#logs .error { color: #fcc; }

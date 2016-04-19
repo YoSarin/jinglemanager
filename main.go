@@ -18,7 +18,7 @@ func main() {
 	flagDoNotOpenBrowser := flag.Bool("no-browser", false, "do not open browser")
 	flag.Parse()
 
-	log := logger.NewLog(func(line *logger.LogLine) { line.Print() })
+	log := logger.NewLog(func(line *logger.LogLine) { lib.ChannelLog.Emit(lib.EventTypeLog, line) })
 	log.LogSeverity[logger.DEBUG] = true
 
 	Ctx := &lib.Context{
@@ -65,7 +65,8 @@ func main() {
 	router.GET("/save", storageHandler.Save)
 	router.POST("/load", storageHandler.Load)
 
-	router.GET("/socket", socketHandler.HandleSocket)
+	router.GET("/changes", socketHandler.HandleChangeSocket)
+	router.GET("/logs", socketHandler.HandleLogSocket)
 
 	wg := sync.WaitGroup{}
 	go func() {

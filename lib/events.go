@@ -4,13 +4,15 @@ import (
 	"fmt"
 )
 
-type channel string
 type eventType string
+type channel struct {
+	name    string
+	allowed map[eventType]bool
+}
 
-var (
-	// ChannelChange - Channel should contain or change events
-	ChannelChange = channel("change")
-
+const (
+	// EventTypeLog - logging event
+	EventTypeLog = eventType("log")
 	// EventTypeCleanup - event type related to total cleanup
 	EventTypeCleanup = eventType("cleanup")
 	// EventTypeVolumeChange - event type related to apps volume change
@@ -27,15 +29,30 @@ var (
 	EventTypeAppRemoved = eventType("app_removed")
 )
 
+var (
+	// ChannelChange - Channel should contain change events
+	ChannelChange = channel{name: "change", allowed: map[eventType]bool{
+		EventTypeAppAdded:     true,
+		EventTypeAppRemoved:   true,
+		EventTypeCleanup:      true,
+		EventTypeSongAdded:    true,
+		EventTypeSongChange:   true,
+		EventTypeSongRemoved:  true,
+		EventTypeVolumeChange: true,
+	}}
+	// ChannelLog - Channel should contain log events
+	ChannelLog = channel{name: "log", allowed: map[eventType]bool{EventTypeLog: true}}
+)
+
 type event struct {
 	Type string
 	Data interface{}
 }
 
-var listeners = make(map[channel][]chan interface{})
+var listeners = make(map[*channel][]chan interface{})
 
 // Subscribe - Will subscribe new listener and returns him and his defer function
-func (c channel) Subscribe() (chan interface{}, func()) {
+func (c *channel) Subscribe() (chan interface{}, func()) {
 	ch := make(chan interface{})
 	listeners[c] = append(listeners[c], ch)
 
@@ -51,19 +68,21 @@ func (c channel) Subscribe() (chan interface{}, func()) {
 }
 
 // Emit - Will emit event to all listeners
-func (c channel) Emit(evType eventType, data interface{}) {
-	ev := struct {
-		Type eventType
-		Data interface{}
-	}{Type: evType, Data: data}
-	for _, ch := range listeners[c] {
-		go func(ch chan interface{}, ev interface{}) {
-			defer func() {
-				if r := recover(); r != nil {
-					fmt.Println("Listener gone", r)
-				}
-			}()
-			ch <- ev
-		}(ch, ev)
+func (c *channel) Emit(evType eventType, data interface{}) {
+	if c.allowed[evType] {
+		ev := struct {
+			Type eventType
+			Data interface{}
+		}{Type: evType, Data: data}
+		for _, ch := range listeners[c] {
+			go func(ch chan interface{}, ev interface{}) {
+				defer func() {
+					if r := recover(); r != nil {
+						fmt.Println("Listener gone", r)
+					}
+				}()
+				ch <- ev
+			}(ch, ev)
+		}
 	}
 }

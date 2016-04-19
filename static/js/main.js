@@ -10,15 +10,16 @@ var Handler = {
     "app_added"      : appAdd,
     "app_removed"    : appRemove,
     "volume_changed" : volumeChange,
-    "cleanup"        : load
+    "cleanup"        : load,
+    "log"            : log,
 }
 
-var socket;
-connectSocket()
+connectSocket("changes");
+connectSocket("logs");
 
-function connectSocket() {
-    console.log("try");
-    socket = new WebSocket("ws://" + window.location.hostname + ":8080/socket");
+function connectSocket(name) {
+    var socket;
+    socket = new WebSocket("ws://" + window.location.hostname + ":8080/" + name);
     socket.onmessage = function(evt) {
         try {
             var data = $.parseJSON(evt.data);
@@ -34,7 +35,7 @@ function connectSocket() {
     }
     socket.onclose = function(evt) {
         setTimeout(function () {
-            connectSocket();
+            connectSocket(name);
         }, 5000);
     }
 }
@@ -169,6 +170,9 @@ function clicker(event) {
     return false;
 }
 
+function log(log) {
+    $('#logs').prepend('<div class="' + log.Severity + '"><strong>' + log.Severity + '</strong> ' + log.Message + '</div>');
+}
 
 function defaultCallback(data) {
     console.log(data);
