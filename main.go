@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"runtime"
 	"sync"
 	"time"
 )
@@ -71,14 +72,27 @@ func main() {
 
 	wg := sync.WaitGroup{}
 	go func() {
+		// running server
 		defer wg.Done()
 		http.ListenAndServe(":8080", router)
+	}()
+
+	go func() {
+		ticker := time.NewTicker(10 * time.Second)
+		for {
+			select {
+			case <-ticker.C:
+				log.Info("GC run")
+				runtime.GC()
+			}
+		}
 	}()
 
 	wg.Add(1)
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt)
 	go func() {
+		// listening for interrupt to save progress
 		defer wg.Done()
 		for signal := range c {
 			switch signal {
