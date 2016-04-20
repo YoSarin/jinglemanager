@@ -12,13 +12,14 @@ import (
 	"os"
 	"os/signal"
 	"sync"
+	"time"
 )
 
 func main() {
 	flagDoNotOpenBrowser := flag.Bool("no-browser", false, "do not open browser")
 	flag.Parse()
 
-	log := logger.NewLog(func(line *logger.LogLine) { lib.ChannelLog.Emit(lib.EventTypeLog, line) })
+	log := logger.NewLog(func(line *logger.LogLine) { lib.ChannelLog.Emit(lib.EventTypeLog, line) }, &logger.Config{GoRoutinesLogTicker: 5 * time.Second})
 	log.LogSeverity[logger.DEBUG] = true
 
 	Ctx := &lib.Context{

@@ -1,9 +1,5 @@
 package lib
 
-import (
-	"fmt"
-)
-
 type eventType string
 type channel struct {
 	name    string
@@ -77,8 +73,9 @@ func (c *channel) Emit(evType eventType, data interface{}) {
 		for _, ch := range listeners[c] {
 			go func(ch chan interface{}, ev interface{}) {
 				defer func() {
-					if r := recover(); r != nil {
-						fmt.Println("Listener gone", r)
+					if r := recover(); r != nil && r != "send on closed channel" {
+						// Unknown and unexpected error
+						panic(r)
 					}
 				}()
 				ch <- ev

@@ -171,7 +171,14 @@ function clicker(event) {
 }
 
 function log(log) {
-    $('#logs').prepend('<div class="' + log.Severity + '"><strong>' + log.Severity + '</strong> ' + log.Message + '</div>');
+    $('#logs')
+        .prepend(
+            $('<div>').attr('class', log.Severity)
+            .append($('<small>').text(new Date(log.Time).toLocaleString())).append(' | ')
+            .append($('<strong>').text(log.Severity)).append(' | ')
+            .append(log.Message).append(' | ')
+            .append($('<small>').text(log.File))
+        )
 }
 
 function defaultCallback(data) {
