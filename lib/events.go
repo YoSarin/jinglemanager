@@ -23,6 +23,10 @@ const (
 	EventTypeAppAdded = eventType("app_added")
 	// EventTypeAppRemoved - event type related to app list change
 	EventTypeAppRemoved = eventType("app_removed")
+	// EventTypeTournamentChange - event type related to tournament change
+	EventTypeTournamentChange = eventType("tournament_change")
+	// EventTypeJingleAdded - event type related to jingle change
+	EventTypeJingleAdded = eventType("jingle_added")
 )
 
 var (

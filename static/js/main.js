@@ -11,6 +11,7 @@ var Handler = {
     "app_removed"    : appRemove,
     "volume_changed" : volumeChange,
     "cleanup"        : load,
+    "jingle_added"   : jingleAdd,
     "log"            : log,
 }
 
@@ -63,6 +64,9 @@ function load() {
     $.ajax("/app/list", {
         success: function(data, status) { listApps(data); }
     });
+    $.ajax("/jingle/list", {
+        success: function(data, status) { listJingles(data); }
+    });
 }
 
 function listTracks(data) {
@@ -74,6 +78,21 @@ function listTracks(data) {
                 songAdd(v);
             }
             songChange(v);
+        });
+    } catch (e) {
+        console.log(e);
+    }
+}
+
+function listJingles(data) {
+    try {
+        var data = $.parseJSON(data);
+        $("#jingles").empty();
+        $.each(data, function (k, v) {
+            if($("#jingle-" + v.ID).length == 0) {
+                jingleAdd(v);
+            }
+            jingleChange(v);
         });
     } catch (e) {
         console.log(e);
@@ -122,6 +141,9 @@ function volumeChange(app) {
     });
 }
 
+function jingleAdd(jingle) {
+}
+
 function songAdd(song) {
     $("#songs")
         .append(
@@ -141,7 +163,6 @@ function songAdd(song) {
 function songRemove(song) {
     $("#song-" + song.ID).remove()
 }
-
 function songChange(song) {
     $("#song-" + song.ID).each(function () {
         $(this).find('.state').text((song.IsPlaying ? "hraje" : "nehraje") + " " + Math.round(song.Position * 100) + "%");
@@ -159,6 +180,8 @@ function clicker(event) {
     var href = $(this).attr("href")
     if (m == "download") {
         $('iframe#downloader').attr("src", href);
+    } else if (m == "visit") {
+        return true;
     } else {
         $.ajax(href, {
             method: (m ? m : "POST"),

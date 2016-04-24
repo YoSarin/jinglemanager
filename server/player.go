@@ -12,16 +12,6 @@ type PlayerHandler struct {
 	Context *lib.Context
 }
 
-// SongI - interface used to play songs
-type SongI interface {
-	Play()
-	Pause()
-	Stop()
-	IsPlaying() bool
-	Position() float64
-	FileName() string
-}
-
 // Add - will add song
 func (p *PlayerHandler) Add(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	r.ParseForm()

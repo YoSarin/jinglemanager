@@ -1,0 +1,19 @@
+<html>
+<head>
+    <link media="screen" href="/css/main.css" rel="stylesheet" type="text/css" />
+    <title>{{.Title}}</title>
+    <script type="text/javascript" src="/js/jquery.js"></script>
+    <script type="text/javascript" src="/js/main.js"></script>
+</head>
+<body>
+    <h2>Nový turnaj</h2>
+    <form action="/tournament/new" method="POST">
+        <label for="name">Jméno turnaje:</label> <input type="text" name="name" /><input type="submit" value="Oukej" />
+    </form>
+    <h2>Načíst turnaj</h2>
+    <form id="load" action="/load" method="POST" enctype="multipart/form-data">
+        <input type="file" name="file" />
+        <input type="submit" value="Načíst nastavení"/>
+    </form>
+</body>
+</html>

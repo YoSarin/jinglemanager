@@ -141,7 +141,7 @@ func (s *Song) Position() float64 {
 	return float64(s.bytesPlayed) / float64(s.bytesTotal)
 }
 
-// ########### FileListItem implementation ##############
+// ########### ListItem implementation ##############
 
 // ID - will return songs ID
 func (s Song) ID() string {

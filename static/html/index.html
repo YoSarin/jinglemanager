@@ -1,26 +1,39 @@
 <html>
 <head>
-    <title>{{.Title}}</title>
     <link media="screen" href="/css/main.css" rel="stylesheet" type="text/css" />
+    <title>{{.Title}} - {{.TournamentName}}</title>
     <script type="text/javascript" src="/js/jquery.js"></script>
     <script type="text/javascript" src="/js/main.js"></script>
 </head>
 <body>
-    <a method="download" href="/save">Stáhnout nastavení</a>
-    <form class="ajax" id="addSong" action="/track/add" method="POST">
-        <input type="text" name="filename" /><input type="submit" value="Přidat song" />
+    <h1>{{.TournamentName}}</h1>
+    <form id="addJingle" action="/jingle/add" enctype="multipart/form-data" method="POST">
+        <input type="file" name="file" />
+        <br />
+        <select name="play">
+            <option value="match_related">Přehrát automaticky</option>
+            <option value="no_play">Nepřehrávat automaticky</option>
+        </select>
+        <input type="text" name="minutes" /> minut
+        <select name="relative_to" />
+            <option value="before_start">před začátkem</option>
+            <option value="before_end">před koncem</option>
+        </select> každého zápasu
+        <br />
+        <input type="submit" value="Přidat jingle" />
     </form>
     <form class="ajax" id="addApp" action="/app/add" method="POST">
         <input type="text" name="name" /><input type="submit" value="Přidat aplikaci" />
     </form>
-    <form id="load" action="/load" method="POST" enctype="multipart/form-data">
-        <input type="file" name="file" />
-        <input type="submit" value="Načíst nastavení"/>
-    </form>
     <ul id="songs"></ul>
+    <ul id="jingles"></ul>
     <a href="/app/mute">Ztlum hudbu</a> | <a href="/app/unmute">Ohul hudbu</a>
     <ul id="apps"></ul>
     <div id="logs"></div>
     <iframe src="" id="downloader" style="display: none;"></iframe>
+    <footer>
+        <a method="download" href="/save">Stáhnout nastavení</a> |
+        <a method="visit" href="/start">Nový turnaj</a>
+    </footer>
 </body>
 </html>

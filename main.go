@@ -20,32 +20,39 @@ func main() {
 	flagDoNotOpenBrowser := flag.Bool("no-browser", false, "do not open browser")
 	flag.Parse()
 
-	log := logger.NewLog(func(line *logger.LogLine) { lib.ChannelLog.Emit(lib.EventTypeLog, line) }, &logger.Config{GoRoutinesLogTicker: 5 * time.Second})
+	log := logger.NewLog(func(line *logger.LogLine) {
+		lib.ChannelLog.Emit(lib.EventTypeLog, line)
+		line.Print()
+	}, &logger.Config{GoRoutinesLogTicker: 5 * time.Second})
 	log.LogSeverity[logger.DEBUG] = true
 
 	Ctx := &lib.Context{
 		Log:        log,
-		Songs:      lib.NewFileList(),
+		Songs:      lib.NewUniqueList(),
 		Sound:      lib.NewSoundController(log),
 		Tournament: lib.NewTournament(""),
+		Jingles:    lib.NewUniqueList(),
 	}
 
 	defer func() {
-		lib.Save(Ctx)
+		Ctx.Save()
 		log.Close()
 	}()
 
-	lib.LoadFromFile(Ctx, "last.yml")
+	Ctx.LoadByName(Ctx.LastTournament())
 
 	httpHandler := server.HTTPHandler{Context: Ctx}
 	fileHandler := server.FileProxyHandler{Context: Ctx}
 	playerHandler := server.PlayerHandler{Context: Ctx}
+	jingleHandler := server.JingleHandler{Context: Ctx}
 	controlHandler := server.SoundControlHandler{Context: Ctx}
 	storageHandler := server.StorageHandler{Context: Ctx}
 	socketHandler := server.SocketHandler{Context: Ctx, Upgrader: &websocket.Upgrader{}}
 
 	router := httprouter.New()
 	router.GET("/", httpHandler.Index)
+	router.GET("/start", httpHandler.Start)
+	router.POST("/tournament/new", httpHandler.NewTournament)
 
 	router.GET("/css/*filepath", fileHandler.Static)
 	router.GET("/js/*filepath", fileHandler.Static)
@@ -57,6 +64,8 @@ func main() {
 	router.POST("/track/stop/:id", playerHandler.Stop)
 	router.POST("/track/pause/:id", playerHandler.Pause)
 	router.DELETE("/track/delete/:id", playerHandler.Delete)
+
+	router.POST("/jingle/add", jingleHandler.Add)
 
 	router.POST("/app/mute", controlHandler.Mute)
 	router.POST("/app/unmute", controlHandler.UnMute)
@@ -97,7 +106,7 @@ func main() {
 		for signal := range c {
 			switch signal {
 			case os.Interrupt:
-				lib.Save(Ctx)
+				Ctx.Save()
 				return
 			}
 		}

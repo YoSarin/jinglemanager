@@ -16,7 +16,8 @@ type HTTPHandler struct {
 
 // IndexData - nope yet
 type IndexData struct {
-	Title string
+	Title          string
+	TournamentName string
 }
 
 // Index - will serve index page
@@ -25,13 +26,38 @@ func (i *HTTPHandler) Index(w http.ResponseWriter, r *http.Request, ps httproute
 		http.NotFound(w, r)
 		return
 	}
-	t, err := template.ParseFiles("static/html/index.html")
+	var t *template.Template
+	var err error
+	if i.Context.Tournament.Name != "" {
+		t, err = template.ParseFiles("static/html/index.html")
+	} else {
+		t, err = template.ParseFiles("static/html/new_tournament.html")
+	}
 	if err != nil {
 		i.Context.Log.Error(err.Error())
 		http.Error(w, "Internal Server Error", 500)
 		return
 	}
-	t.Execute(w, &IndexData{"Jingle Manager"})
+	t.Execute(w, &IndexData{"Jingle Manager", i.Context.Tournament.Name})
+}
+
+// Start - will serve index page
+func (i *HTTPHandler) Start(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	t, err := template.ParseFiles("static/html/new_tournament.html")
+	if err != nil {
+		i.Context.Log.Error(err.Error())
+		http.Error(w, "Internal Server Error", 500)
+		return
+	}
+	t.Execute(w, &IndexData{"Jingle Manager", i.Context.Tournament.Name})
+}
+
+// NewTournament - will serve index page
+func (i *HTTPHandler) NewTournament(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	name := r.FormValue("name")
+	i.Context.Save()
+	i.Context.NewTournament(name)
+	http.Redirect(w, r, "/", 302)
 }
 
 // FileProxyHandler - struct handling file returns from server

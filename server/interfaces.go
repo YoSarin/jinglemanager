@@ -8,3 +8,13 @@ type LogI interface {
 	Debug(string)
 	Notice(string)
 }
+
+// SongI - interface used to play songs
+type SongI interface {
+	Play()
+	Pause()
+	Stop()
+	IsPlaying() bool
+	Position() float64
+	FileName() string
+}
