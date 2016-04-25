@@ -2,7 +2,7 @@ package lib
 
 import (
 	"errors"
-	"github.com/go-yaml/yaml"
+	"gopkg.in/yaml.v2"
 	"io"
 	"io/ioutil"
 	"os"
@@ -59,13 +59,20 @@ func (c *Context) Load(input []byte) {
 	yaml.Unmarshal(input, d)
 	for _, val := range d.Songs {
 		c.Log.Debug("adding song: " + val)
-		c.Songs.AddUniq(val, c.Log, NewSong)
+        s, err := NewSong(val, c.Log)
+        if err != nil {
+            c.Log.Error(err.Error())
+        } else {
+            c.Songs.AddUniq(s, c.Log)
+        }
 	}
 	for _, val := range d.Applications {
 		c.Log.Debug("adding application: " + val)
 		c.Sound.AddUniq(val, c.Log)
 	}
-	c.Tournament = d.Tournament
+    if d.Tournament != nil {
+        c.Tournament = d.Tournament
+    }
 }
 
 // LoadByName - will load data from file

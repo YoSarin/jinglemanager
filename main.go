@@ -106,6 +106,7 @@ func main() {
 		for signal := range c {
 			switch signal {
 			case os.Interrupt:
+                log.Warning("Server is done - finishing")
 				Ctx.Save()
 				return
 			}

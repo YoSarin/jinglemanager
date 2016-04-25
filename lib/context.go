@@ -34,7 +34,7 @@ func (c *Context) cleanup() {
 func (c *Context) StorageDir() string {
 	u, _ := user.Current()
 	p := path.Join(u.HomeDir, ".jinglemanager", c.Tournament.Name, "media")
-	os.MkdirAll(p, os.ModeDir)
+	os.MkdirAll(p, 0700)
 	return path.Join(u.HomeDir, ".jinglemanager", c.Tournament.Name)
 }
 
@@ -42,7 +42,7 @@ func (c *Context) StorageDir() string {
 func (c *Context) AppDir() string {
 	u, _ := user.Current()
 	p := path.Join(u.HomeDir, ".jinglemanager")
-	os.MkdirAll(p, os.ModeDir)
+	os.MkdirAll(p, 0700)
 	return path.Join(u.HomeDir, ".jinglemanager")
 }
 

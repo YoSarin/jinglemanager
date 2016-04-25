@@ -33,14 +33,10 @@ func (l *UniqueList) Add(i ListItem) {
 }
 
 // AddUniq - will add unique value
-func (l *UniqueList) AddUniq(filename string, log LogI, creator func(string, LogI) (ListItem, error)) (s ListItem, err error) {
-	f := l.FindByFile(filename)
+func (l *UniqueList) AddUniq(item ListItem, log LogI) (err error) {
+	f := l.list[item.ID()]
 	if f == nil {
-		s, err = creator(filename, log)
-		if err != nil {
-			return nil, err
-		}
-		l.Add(s)
+		l.Add(item)
 	}
 	return
 }

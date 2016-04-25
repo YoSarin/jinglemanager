@@ -7,7 +7,7 @@
 </head>
 <body>
     <h1>{{.TournamentName}}</h1>
-    <form id="addJingle" action="/jingle/add" enctype="multipart/form-data" method="POST">
+    <form id="addJingle" action="/jingle/add" enctype="multipart/form-data" method="POST" target="downloader">
         <input type="file" name="file" />
         <br />
         <select name="play">
@@ -29,11 +29,11 @@
     <ul id="jingles"></ul>
     <a href="/app/mute">Ztlum hudbu</a> | <a href="/app/unmute">Ohul hudbu</a>
     <ul id="apps"></ul>
-    <div id="logs"></div>
-    <iframe src="" id="downloader" style="display: none;"></iframe>
     <footer>
         <a method="download" href="/save">Stáhnout nastavení</a> |
         <a method="visit" href="/start">Nový turnaj</a>
     </footer>
+    <div id="logs"></div>
+    <iframe src="" id="downloader" name="downloader" style="display: none;"></iframe>
 </body>
 </html>

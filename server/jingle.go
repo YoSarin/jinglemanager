@@ -27,8 +27,12 @@ func (h *JingleHandler) Add(w http.ResponseWriter, r *http.Request, ps httproute
 	defer file.Close()
 
 	filename, err := h.Context.SaveSong(file, info.Filename)
-
-	s, err := h.Context.Songs.AddUniq(filename, h.Context.Log)
+    s, err := lib.NewSong(filename, h.Context.Log)
+    if err != nil {
+        h.Context.Log.Error(err.Error())
+    } else {
+        h.Context.Songs.AddUniq(s, h.Context.Log)
+    }
 
 	offset, err := strconv.Atoi(r.FormValue("minutes"))
 	if err != nil {
@@ -36,7 +40,6 @@ func (h *JingleHandler) Add(w http.ResponseWriter, r *http.Request, ps httproute
 	}
 
 	name, point := jingleName(r.FormValue("relative_to"), time.Duration(offset)*time.Minute)
-
 	lib.NewJingle(
 		name,
 		s,

@@ -1,3 +1,6 @@
+var scripts = document.getElementsByTagName("script");
+var __FILE__ = scripts[scripts.length-1].src;
+
 $(document).ready(function() {
     hook();
     load();
@@ -21,6 +24,14 @@ connectSocket("logs");
 function connectSocket(name) {
     var socket;
     socket = new WebSocket("ws://" + window.location.hostname + ":8080/" + name);
+    socket.onopen = function(evt) {
+        log({
+            Severity: "info",
+            Time: new Date(),
+            Message: "WebSocket " + name + " connected",
+            File: __FILE__
+        })
+    }
     socket.onmessage = function(evt) {
         try {
             var data = $.parseJSON(evt.data);
