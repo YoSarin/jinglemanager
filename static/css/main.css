@@ -11,3 +11,23 @@ body { color: #88f; }
 #logs .info { color: #cfc; }
 #logs .warning { color: #f82; }
 #logs .error { color: #fcc; }
+
+#songs {
+    display: none;
+}
+
+.metro > * {
+    display: block;
+    width: 150px;
+    height: 150px;
+    padding: 4px;
+    margin: 5px;
+    float: left;
+    overflow: hidden;
+    border: 1px solid #ccc;
+}
+
+.metro {
+    overflow: hidden;
+    display: block;
+}

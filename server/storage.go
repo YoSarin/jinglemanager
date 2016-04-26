@@ -14,11 +14,12 @@ type StorageHandler struct {
 
 // Save - will save data
 func (s *StorageHandler) Save(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	name := s.Context.Tournament.Name
-	out := s.Context.Save()
-	w.Header().Set("Content-type", "application/octet-stream")
-	w.Header().Set("Content-disposition", "attachment; filename="+name+".yml")
-	w.Write(out)
+    s.Context.Save()
+	// name := s.Context.Tournament.Name
+	// out := s.Context.Save()
+	// w.Header().Set("Content-type", "application/octet-stream")
+	// w.Header().Set("Content-disposition", "attachment; filename="+name+".yml")
+	// w.Write(out)
 }
 
 // Load - will load data from specified file
