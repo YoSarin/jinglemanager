@@ -3,9 +3,9 @@ package main
 import (
 	"flag"
 	"github.com/gorilla/websocket"
-	"github.com/julienschmidt/httprouter"
 	"github.com/martin-reznik/jinglemanager/lib"
 	"github.com/martin-reznik/jinglemanager/server"
+	"github.com/martin-reznik/jinglemanager/router"
 	"github.com/martin-reznik/logger"
 	"github.com/skratchdot/open-golang/open"
 	"net/http"
@@ -49,41 +49,44 @@ func main() {
 	storageHandler := server.StorageHandler{Context: Ctx}
 	socketHandler := server.SocketHandler{Context: Ctx, Upgrader: &websocket.Upgrader{}}
 
-	router := httprouter.New()
-	router.GET("/", httpHandler.Index)
-	router.GET("/start", httpHandler.Start)
-	router.POST("/tournament/new", httpHandler.NewTournament)
+	web := router.NewRouter(log)
+    
+    web.AddMiddleware(router.NewAuthMiddleware(log))
 
-	router.GET("/css/*filepath", fileHandler.Static)
-	router.GET("/js/*filepath", fileHandler.Static)
-	router.GET("/images/*filepath", fileHandler.Static)
+	web.GET("/", httpHandler.Index)
+	web.GET("/start", httpHandler.Start)
+	web.POST("/tournament/new", httpHandler.NewTournament)
 
-	router.POST("/track/add", playerHandler.Add)
-	router.GET("/track/list", playerHandler.List)
-	router.POST("/track/play/:id", playerHandler.Play)
-	router.POST("/track/stop/:id", playerHandler.Stop)
-	router.POST("/track/pause/:id", playerHandler.Pause)
-	router.DELETE("/track/delete/:id", playerHandler.Delete)
+	web.GET("/css/*filepath", fileHandler.Static)
+	web.GET("/js/*filepath", fileHandler.Static)
+	web.GET("/images/*filepath", fileHandler.Static)
 
-	router.POST("/jingle/add", jingleHandler.Add)
+	web.POST("/track/add", playerHandler.Add)
+	web.GET("/track/list", playerHandler.List)
+	web.POST("/track/play/:id", playerHandler.Play)
+	web.POST("/track/stop/:id", playerHandler.Stop)
+	web.POST("/track/pause/:id", playerHandler.Pause)
+	web.DELETE("/track/delete/:id", playerHandler.Delete)
 
-	router.POST("/app/mute", controlHandler.Mute)
-	router.POST("/app/unmute", controlHandler.UnMute)
-	router.POST("/app/add", controlHandler.Add)
-	router.DELETE("/app/delete/:id", controlHandler.Delete)
-	router.GET("/app/list", controlHandler.List)
+	web.POST("/jingle/add", jingleHandler.Add)
 
-	router.GET("/save", storageHandler.Save)
-	router.POST("/load", storageHandler.Load)
+	web.POST("/app/mute", controlHandler.Mute)
+	web.POST("/app/unmute", controlHandler.UnMute)
+	web.POST("/app/add", controlHandler.Add)
+	web.DELETE("/app/delete/:id", controlHandler.Delete)
+	web.GET("/app/list", controlHandler.List)
 
-	router.GET("/changes", socketHandler.HandleChangeSocket)
-	router.GET("/logs", socketHandler.HandleLogSocket)
+	web.GET("/save", storageHandler.Save)
+	web.POST("/load", storageHandler.Load)
+
+	web.GET("/changes", socketHandler.HandleChangeSocket)
+	web.GET("/logs", socketHandler.HandleLogSocket)
 
 	wg := sync.WaitGroup{}
 	go func() {
 		// running server
 		defer wg.Done()
-		http.ListenAndServe(":8080", router)
+		http.ListenAndServe(":8080", web)
 	}()
 
 	go func() {

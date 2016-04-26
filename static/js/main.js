@@ -216,5 +216,5 @@ function log(log) {
 }
 
 function defaultCallback(data) {
-    console.log(data);
+    console.log("DefaultCallback: ", data);
 }
