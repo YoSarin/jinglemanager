@@ -50,7 +50,7 @@ func main() {
 	socketHandler := server.SocketHandler{Context: Ctx, Upgrader: &websocket.Upgrader{}}
 
 	web := router.NewRouter(log)
-    
+
     web.AddMiddleware(router.NewAuthMiddleware(log))
 
 	web.GET("/", httpHandler.Index)
@@ -69,6 +69,7 @@ func main() {
 	web.DELETE("/track/delete/:id", playerHandler.Delete)
 
 	web.POST("/jingle/add", jingleHandler.Add)
+	web.GET("/jingle/list", jingleHandler.List)
 
 	web.POST("/app/mute", controlHandler.Mute)
 	web.POST("/app/unmute", controlHandler.UnMute)

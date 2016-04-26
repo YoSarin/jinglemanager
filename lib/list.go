@@ -7,7 +7,7 @@ import (
 // ListItem - Item in List of files
 type ListItem interface {
 	ID() string
-	Remove()
+	OnRemove()
 }
 
 type hasFileName interface {
@@ -52,7 +52,7 @@ func (l *UniqueList) Find(id string) (ListItem, error) {
 
 // Delete - will delete item from list
 func (l *UniqueList) Delete(id string) {
-	l.list[id].Remove()
+	l.list[id].OnRemove()
 	delete(l.list, id)
 }
 

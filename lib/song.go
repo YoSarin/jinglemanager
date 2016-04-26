@@ -10,13 +10,13 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
+    "path"
 )
 
 // Song - queue item containing info about playing sound
 type Song struct {
 	id           string
 	File         string
-	logger       LogI
 	stream       []byte
 	ao           *ao.SampleFormat
 	playing      bool
@@ -24,18 +24,22 @@ type Song struct {
 	bytesTotal   int64
 	stopPlayback chan bool
 	done         chan bool
+    context      *Context
 }
 
 // NewSong - creates new song
-func NewSong(filename string, log LogI) (*Song, error) {
-	if _, err := os.Stat(filename); os.IsNotExist(err) {
-		return nil, fmt.Errorf("File %v does not exist", filename)
+func NewSong(filename string, c *Context) (*Song, error) {
+    filepath := path.Join(c.MediaDir(), filename)
+
+	if _, err := os.Stat(filepath); os.IsNotExist(err) {
+		return nil, fmt.Errorf("File %v does not exist", filepath)
 	}
-	stream, ao := getMusicStream(filename)
-	s := &Song{
+
+	stream, ao := getMusicStream(filepath)
+
+    s := &Song{
 		id:           fmt.Sprintf("%x", md5.Sum(stream)),
 		File:         filename,
-		logger:       log,
 		stream:       stream,
 		ao:           ao,
 		playing:      false,
@@ -43,14 +47,17 @@ func NewSong(filename string, log LogI) (*Song, error) {
 		bytesTotal:   int64(len(stream)),
 		stopPlayback: make(chan bool, 1),
 		done:         make(chan bool, 1),
+        context:      c,
 	}
-	ChannelChange.Emit(EventTypeSongAdded, s)
+
+    ChannelChange.Emit(EventTypeSongAdded, s)
 	return s, nil
 }
 
-// Remove - will trigger actions related to removal of song from File List
-func (s *Song) Remove() {
+// OnRemove - will trigger actions related to removal of song from File List
+func (s *Song) OnRemove() {
 	s.Stop()
+    s.context.RemoveSong(s.FileName())
 	ChannelChange.Emit(EventTypeSongRemoved, s)
 }
 
@@ -100,7 +107,7 @@ func (s *Song) Play() {
 			default:
 				size, err := dev.Write(s.stream[step*bufSize : (step+1)*bufSize])
 				if err != nil {
-					s.logger.Error(err.Error())
+					s.context.Log.Error(err.Error())
 					return
 				}
 				s.bytesPlayed += int64(size)

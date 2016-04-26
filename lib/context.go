@@ -32,10 +32,16 @@ func (c *Context) cleanup() {
 
 // StorageDir - return path to current tournament directory (and creates path if necessarry)
 func (c *Context) StorageDir() string {
-	u, _ := user.Current()
-	p := path.Join(u.HomeDir, ".jinglemanager", c.Tournament.Name, "media")
+	p := path.Join(c.AppDir(), c.Tournament.Name)
 	os.MkdirAll(p, 0700)
-	return path.Join(u.HomeDir, ".jinglemanager", c.Tournament.Name)
+	return path.Join(p)
+}
+
+// MediaDir - return path to current tournament directory (and creates path if necessarry)
+func (c *Context) MediaDir() string {
+    p := path.Join(c.StorageDir(), "media")
+    os.MkdirAll(p, 0700)
+	return p
 }
 
 // AppDir - return path to application directory
@@ -43,7 +49,7 @@ func (c *Context) AppDir() string {
 	u, _ := user.Current()
 	p := path.Join(u.HomeDir, ".jinglemanager")
 	os.MkdirAll(p, 0700)
-	return path.Join(u.HomeDir, ".jinglemanager")
+	return path.Join(p)
 }
 
 // LastTournament - return path to application directory

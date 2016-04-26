@@ -11,19 +11,17 @@ import (
 
 type data struct {
 	Tournament   *Tournament
-	Songs        []string
 	Applications []string
-	Jingles      []*Jingle
+	Jingles      []*JingleStorage
 }
 
 // Save - will save data to yaml file
 func (c *Context) Save() []byte {
 	if c.Tournament.Name != "" {
 		d := &data{
-			Songs:        c.Songs.FileNames(),
 			Applications: c.Sound.AppNames(),
 			Tournament:   c.Tournament,
-			Jingles:      c.Jingles.JingleList(),
+			Jingles:      c.Jingles.JingleStorageList(),
 		}
 		out, err := yaml.Marshal(d)
 		if err != nil {
@@ -57,22 +55,25 @@ func (c *Context) Load(input []byte) {
 	c.cleanup()
 	d := &data{}
 	yaml.Unmarshal(input, d)
-	for _, val := range d.Songs {
-		c.Log.Debug("adding song: " + val)
-        s, err := NewSong(val, c.Log)
+
+    if d.Tournament == nil {
+        return;
+    }
+
+    c.Tournament = d.Tournament
+	for _, val := range d.Jingles {
+        s, err := NewSong(val.File, c)
         if err != nil {
             c.Log.Error(err.Error())
         } else {
             c.Songs.AddUniq(s, c.Log)
+            c.Jingles.AddUniq(NewJingle(val.Name, s, val.TimeBeforePoint, val.Point, c), c.Log)
         }
 	}
 	for _, val := range d.Applications {
 		c.Log.Debug("adding application: " + val)
 		c.Sound.AddUniq(val, c.Log)
 	}
-    if d.Tournament != nil {
-        c.Tournament = d.Tournament
-    }
 }
 
 // LoadByName - will load data from file
@@ -98,7 +99,7 @@ func (c *Context) LoadByName(name string) error {
 // SaveSong - will save uploaded song file into tournament directory
 func (c *Context) SaveSong(r io.Reader, filename string) (string, error) {
 	c.Log.Info(filename)
-	targetFile := path.Join(c.StorageDir(), "media", filename)
+	targetFile := path.Join(c.MediaDir(), filename)
 	writer, err := os.Create(targetFile)
 
 	if err != nil {
@@ -113,5 +114,11 @@ func (c *Context) SaveSong(r io.Reader, filename string) (string, error) {
 		c.Log.Error("File upload failed: " + err.Error())
 		return "", err
 	}
-	return targetFile, nil
+	return filename, nil
+}
+
+// RemoveSong - will remove song
+func (c *Context) RemoveSong(filename string) error {
+    filepath := path.Join(c.MediaDir(), filename)
+    return os.Remove(filepath)
 }

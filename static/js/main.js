@@ -15,6 +15,8 @@ var Handler = {
     "volume_changed" : volumeChange,
     "cleanup"        : load,
     "jingle_added"   : jingleAdd,
+    "jingle_changed" : jingleChange,
+    "jingle_removed" : jingleRemove,
     "log"            : log,
 }
 
@@ -69,14 +71,14 @@ function hook() {
 }
 
 function load() {
+    $.ajax("/jingle/list", {
+        success: function(data, status) { listJingles(data); }
+    });
     $.ajax("/track/list", {
         success: function(data, status) { listTracks(data); }
     });
     $.ajax("/app/list", {
         success: function(data, status) { listApps(data); }
-    });
-    $.ajax("/jingle/list", {
-        success: function(data, status) { listJingles(data); }
     });
 }
 
@@ -100,7 +102,7 @@ function listJingles(data) {
         var data = $.parseJSON(data);
         $("#jingles").empty();
         $.each(data, function (k, v) {
-            if($("#jingle-" + v.ID).length == 0) {
+            if($("#jingle-" + v.Song.ID).length == 0) {
                 jingleAdd(v);
             }
             jingleChange(v);
@@ -126,6 +128,9 @@ function listApps(data) {
 }
 
 function appAdd(app) {
+    if($("#app-" + app.ID).length > 0) {
+        return;
+    }
     $("#apps")
         .append(
             $('<div id="app-' + app.ID + '" class="app"></div>')
@@ -153,9 +158,36 @@ function volumeChange(app) {
 }
 
 function jingleAdd(jingle) {
+    if($("#jingle-" + jingle.Song.ID).length > 0) {
+        return;
+    }
+    $("#jingles")
+        .append(
+            $('<div id="jingle-' + jingle.Song.ID + '" class="song"></div>')
+            .append($('<a class="control" href="/track/play/' + jingle.Song.ID + '">play</a>')).append(' | ')
+            .append($('<a class="control" href="/track/stop/' + jingle.Song.ID + '">stop</a>')).append(' | ')
+            .append($('<a class="control" href="/track/pause/' + jingle.Song.ID + '">pause</a>')).append(' | ')
+            .append($('<a class="control" method="delete" href="/track/delete/' + jingle.Song.ID + '">delete</a>')).append(' | ')
+            .append($('<small class="state">').text(jingle.Song.IsPlaying ? "hraje" : "nehraje")).append(' | ')
+            .append($("<strong>").text(jingle.Name)).append(' | ')
+            .append($('<small class="songtitle">').text(jingle.Song.File))
+        ).find("a").each(function (k, v) {
+            $(v).prop('onclick', null).off('click');
+            $(v).click(clicker);
+        });
+}
+
+function jingleChange(jingle) {
+}
+
+function jingleRemove(jingle) {
+    $("#jingle-" + jingle.ID).remove()
 }
 
 function songAdd(song) {
+    if($("#song-" + song.ID).length > 0) {
+        return;
+    }
     $("#songs")
         .append(
             $('<div id="song-' + song.ID + '" class="song"></div>')
@@ -175,7 +207,7 @@ function songRemove(song) {
     $("#song-" + song.ID).remove()
 }
 function songChange(song) {
-    $("#song-" + song.ID).each(function () {
+    $("#song-" + song.ID + ", #jingle-" + song.ID).each(function () {
         $(this).find('.state').text((song.IsPlaying ? "hraje" : "nehraje") + " " + Math.round(song.Position * 100) + "%");
     });
 }

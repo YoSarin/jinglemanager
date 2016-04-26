@@ -27,18 +27,23 @@ const (
 	EventTypeTournamentChange = eventType("tournament_change")
 	// EventTypeJingleAdded - event type related to jingle change
 	EventTypeJingleAdded = eventType("jingle_added")
+	// EventTypeJingleRemoved - event type related to jingle change
+	EventTypeJingleRemoved = eventType("jingle_removed")
 )
 
 var (
 	// ChannelChange - Channel should contain change events
 	ChannelChange = channel{name: "change", allowed: map[eventType]bool{
-		EventTypeAppAdded:     true,
-		EventTypeAppRemoved:   true,
-		EventTypeCleanup:      true,
-		EventTypeSongAdded:    true,
-		EventTypeSongChange:   true,
-		EventTypeSongRemoved:  true,
-		EventTypeVolumeChange: true,
+		EventTypeAppAdded:         true,
+		EventTypeAppRemoved:       true,
+		EventTypeCleanup:          true,
+		EventTypeSongAdded:        true,
+		EventTypeSongChange:       true,
+		EventTypeSongRemoved:      true,
+		EventTypeVolumeChange:     true,
+        EventTypeTournamentChange: true,
+        EventTypeJingleAdded:      true,
+        EventTypeJingleRemoved:    true,
 	}}
 	// ChannelLog - Channel should contain log events
 	ChannelLog = channel{name: "log", allowed: map[eventType]bool{EventTypeLog: true}}
