@@ -93,7 +93,7 @@ func (s *Song) Play() {
 		defer s.playbackDone()
 
 		ao.Initialize()
-		defer ao.Shutdown()
+		// defer ao.Shutdown()
 		dev := ao.NewLiveDevice(s.ao)
 		defer dev.Close()
 
@@ -140,6 +140,7 @@ func (s *Song) Pause() {
 	s.stopPlayback <- true
 	// wait for confirmation that playback has stopped
 	_ = <-s.done
+    s.playing = false
 	ChannelChange.Emit(EventTypeSongChange, s)
 }
 

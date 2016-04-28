@@ -5,7 +5,6 @@ import (
 	"github.com/julienschmidt/httprouter"
 	"github.com/martin-reznik/jinglemanager/lib"
 	"html/template"
-	"io/ioutil"
 	"net/http"
 )
 
@@ -68,11 +67,5 @@ type FileProxyHandler struct {
 // Static - handler for static content
 func (f *FileProxyHandler) Static(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	path := fmt.Sprintf("static%v", r.URL.Path)
-	data, err := ioutil.ReadFile(path)
-	if err != nil {
-		f.Context.Log.Error(err.Error())
-		http.NotFound(w, r)
-		return
-	}
-	fmt.Fprint(w, string(data))
+    http.ServeFile(w, r, path)
 }

@@ -32,13 +32,25 @@ func (h *JingleHandler) Add(w http.ResponseWriter, r *http.Request, ps httproute
     } else {
         h.Context.Songs.AddUniq(s, h.Context.Log)
     }
+    var (
+        name string
+        point lib.MatchPoint
+        offset time.Duration
+    )
 
-	offset, err := strconv.Atoi(r.FormValue("minutes"))
-	if err != nil {
-		offset = 0
-	}
+    if r.FormValue("play") == "match_related" {
+    	offset, err := strconv.Atoi(r.FormValue("minutes"))
+    	if err != nil {
+    		offset = 0
+    	}
 
-	name, point := lib.JingleName(r.FormValue("relative_to"), time.Duration(offset)*time.Minute)
+    	name, point = lib.JingleName(r.FormValue("relative_to"), time.Duration(offset)*time.Minute)
+    } else {
+        name   = filename
+        point  = lib.MatchNone
+        offset = 0
+    }
+
 	j := lib.NewJingle(
 		name,
 		s,
@@ -48,6 +60,8 @@ func (h *JingleHandler) Add(w http.ResponseWriter, r *http.Request, ps httproute
 	)
 
     h.Context.Jingles.AddUniq(j, h.Context.Log)
+
+    http.Redirect(w, r, "/", 302)
 }
 
 // List - will list all jingles

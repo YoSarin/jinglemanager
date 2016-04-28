@@ -1,15 +1,20 @@
 var scripts = document.getElementsByTagName("script");
 var __FILE__ = scripts[scripts.length-1].src;
+var pointOrder = {
+    "match_start" : 0,
+    "match_end"   : 1,
+    "match_none"  : 2,
+}
+
 
 $(document).ready(function() {
     hook();
     load();
+    showHideJingleMatchDetails();
 });
 
 var Handler = {
     "song_changed"   : songChange,
-    "song_added"     : songAdd,
-    "song_removed"   : songRemove,
     "app_added"      : appAdd,
     "app_removed"    : appRemove,
     "volume_changed" : volumeChange,
@@ -68,6 +73,18 @@ function hook() {
         })
         return false;
     });
+
+    $("#jingles").sortable({
+        stop: function(event, ui) {
+            // event.toElement is the element that was responsible
+            // for triggering this event. The handle, in case of a draggable.
+            $( event.originalEvent.target ).one('click', function(e){ e.stopImmediatePropagation(); } );
+        }
+    }).disableSelection()
+
+    $("#addJingle select[name=play]").change(function() {
+        showHideJingleMatchDetails();
+    });
 }
 
 function load() {
@@ -82,14 +99,20 @@ function load() {
     });
 }
 
+function showHideJingleMatchDetails() {
+    var v = $("#addJingle select[name=play]").val()
+    if (v == "match_related") {
+        $(".matchOnly").removeClass("hidden");
+    } else {
+        $(".matchOnly").addClass("hidden");
+    }
+}
+
 function listTracks(data) {
     try {
         var data = $.parseJSON(data);
         $("#songs").empty();
         $.each(data, function (k, v) {
-            if($("#song-" + v.ID).length == 0) {
-                songAdd(v);
-            }
             songChange(v);
         });
     } catch (e) {
@@ -133,10 +156,12 @@ function appAdd(app) {
     }
     $("#apps")
         .append(
-            $('<div id="app-' + app.ID + '" class="app"></div>')
-            .append($('<a class="control" method="delete" href="/app/delete/' + app.ID + '">delete</a>')).append(' | ')
-            .append($("<strong>").text(app.Name)).append(" ")
-            .append($('<small class="state">').text(Math.round(100 * app.Volume) + "%"))
+            $('<li id="app-' + app.ID + '" class="app">')
+            .append($('<div class="content">')
+                .append($("<strong>").text(app.Name)).append(" ")
+                .append($('<small class="state">').text("[" + Math.round(100 * app.Volume) + "%]")).append("<br />")
+                .append($('<a class="control" method="delete" href="/app/delete/' + app.ID + '">delete</a>'))
+            )
         ).find("a").each(function (k, v) {
             $(v).prop('onclick', null).off('click');
             $(v).click(clicker);
@@ -161,20 +186,69 @@ function jingleAdd(jingle) {
     if($("#jingle-" + jingle.Song.ID).length > 0) {
         return;
     }
-    $("#jingles")
-        .append(
-            $('<div id="jingle-' + jingle.Song.ID + '" class="song"></div>')
-            .append($('<a class="control" href="/track/play/' + jingle.Song.ID + '">play</a>')).append(' | ')
-            .append($('<a class="control" href="/track/stop/' + jingle.Song.ID + '">stop</a>')).append(' | ')
-            .append($('<a class="control" href="/track/pause/' + jingle.Song.ID + '">pause</a>')).append(' | ')
-            .append($('<a class="control" method="delete" href="/track/delete/' + jingle.Song.ID + '">delete</a>')).append(' | ')
-            .append($('<small class="state">').text(jingle.Song.IsPlaying ? "hraje" : "nehraje")).append(' | ')
-            .append($("<strong>").text(jingle.Name)).append(' | ')
+    var newJingle = $('<li id="jingle-' + jingle.Song.ID + '" class="song" time="' + jingle.TimeBeforePoint + '" point="' + jingle.Point + '">')
+        .append($('<div class="progress">').css("width", Math.round(jingle.Song.Position * 100) + "%"))
+        .append($('<div class="content">')
+            .append($("<strong>").text(jingle.Name)).append('<br />')
             .append($('<small class="songtitle">').text(jingle.Song.File))
-        ).find("a").each(function (k, v) {
+        ).each(function (k, v) {
             $(v).prop('onclick', null).off('click');
-            $(v).click(clicker);
+            $(v).multi_click(jinglePlayPause, jingleStop, jingleDelete, 500);
         });
+    $("#jingles").append(newJingle);
+
+    $("#jingles li").each(function (k, v) {
+        if (compareJingles(newJingle, $(v)) == -1) {
+            newJingle.insertBefore(v);
+            return false;
+        }
+    });
+
+
+}
+
+function compareJingles(a, b) {
+    if (pointOrder[a.attr("point")] > pointOrder[b.attr("point")]) {
+        return 1;
+    } else if (pointOrder[a.attr("point")] < pointOrder[b.attr("point")]) {
+        return -1;
+    } else if (-1*parseInt(a.attr("time")) > -1*parseInt(b.attr("time"))) {
+        return 1;
+    } else if (-1*parseInt(a.attr("time")) < -1*parseInt(b.attr("time"))) {
+        return -1;
+    }
+    return 0;
+}
+
+function jinglePlayPause(event) {
+    var s = $(this);
+    var action = s.hasClass("playing") ? "pause" : "play";
+    var id = s.attr("id").replace("jingle-", "");
+    var url = "/track/" + action + "/" + id;
+    $.ajax(url, {
+        method: "POST"
+    });
+}
+
+function jingleStop(event) {
+    var s = $(this);
+    var id = s.attr("id").replace("jingle-", "");
+    var url = "/track/stop/" + id;
+    $.ajax(url, {
+        method: "POST"
+    });
+}
+
+function jingleDelete(event) {
+    var s = $(this);
+    var id = s.attr("id").replace("jingle-", "");
+    var url = "/track/delete/" + id;
+
+    if (confirm("Fakt smazat jingle '" + s.find("strong").text() + "'?")) {
+        $.ajax(url, {
+            method: "DELETE"
+        });
+    }
 }
 
 function jingleChange(jingle) {
@@ -184,31 +258,12 @@ function jingleRemove(jingle) {
     $("#jingle-" + jingle.ID).remove()
 }
 
-function songAdd(song) {
-    if($("#song-" + song.ID).length > 0) {
-        return;
-    }
-    $("#songs")
-        .append(
-            $('<div id="song-' + song.ID + '" class="song"></div>')
-            .append($('<a class="control" href="/track/play/' + song.ID + '">play</a>')).append(' | ')
-            .append($('<a class="control" href="/track/stop/' + song.ID + '">stop</a>')).append(' | ')
-            .append($('<a class="control" href="/track/pause/' + song.ID + '">pause</a>')).append(' | ')
-            .append($('<a class="control" method="delete" href="/track/delete/' + song.ID + '">delete</a>')).append(' | ')
-            .append($('<small class="state">').text(song.IsPlaying ? "hraje" : "nehraje")).append(' | ')
-            .append($("<strong>").text(song.File))
-
-        ).find("a").each(function (k, v) {
-            $(v).prop('onclick', null).off('click');
-            $(v).click(clicker);
-        });
-}
-function songRemove(song) {
-    $("#song-" + song.ID).remove()
-}
 function songChange(song) {
-    $("#song-" + song.ID + ", #jingle-" + song.ID).each(function () {
-        $(this).find('.state').text((song.IsPlaying ? "hraje" : "nehraje") + " " + Math.round(song.Position * 100) + "%");
+    $("#jingle-" + song.ID).each(function () {
+        $(this).find('.progress').css("width", Math.round(song.Position * 100) + "%");
+        $(this).removeClass("playing");
+        $(this).removeClass("paused");
+        $(this).addClass(song.IsPlaying ? "playing" : song.Position > 0 ? "paused" : "");
     });
 }
 

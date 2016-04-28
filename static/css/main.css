@@ -16,11 +16,24 @@ body { color: #88f; }
     display: none;
 }
 
-.metro > * {
+.progress {
     display: block;
-    width: 150px;
-    height: 150px;
+    background-color: #ccc;
+    height: 5px;
+}
+
+.metro > * > .content {
     padding: 4px;
+    text-align: center;
+}
+
+.metro > * {
+    background-color: #eee;
+    cursor: pointer;
+    display: block;
+    min-width: 250px;
+    height: 80px;
+    line-height: 30px;
     margin: 5px;
     float: left;
     overflow: hidden;
@@ -30,4 +43,43 @@ body { color: #88f; }
 .metro {
     overflow: hidden;
     display: block;
+    border-bottom: 1px solid #ccc;
+    padding: 4px;
+    -webkit-user-select: none; /* webkit (safari, chrome) browsers */
+    -moz-user-select: none; /* mozilla browsers */
+    -khtml-user-select: none; /* webkit (konqueror) browsers */
+    -ms-user-select: none; /* IE10+ */
+}
+
+.playing {
+    background-color: #efe;
+}
+
+form {
+    margin-top: 10px;
+    margin-bottom: 5px;
+    border-bottom: 1px solid #ccc;
+    padding: 5px;
+}
+
+legend {
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+#addJingle .shortText {
+    width: 30px;
+    border: none;
+    border-bottom: 1px solid #ccc;
+    text-align: center;
+}
+
+.hidden {
+    display: none;
+}
+
+#sideColumn {
+    float: right;
+    width: 30%;
+    height: 600px;
 }

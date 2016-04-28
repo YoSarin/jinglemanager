@@ -14,6 +14,8 @@ const (
 	MatchStart = MatchPoint("match_start")
 	// MatchEnd - end of match
 	MatchEnd = MatchPoint("match_end")
+    // MatchNone - no match related
+    MatchNone = MatchPoint("match_none")
 )
 
 // Jingle - holds info about jingle (song, timing and so)

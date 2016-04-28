@@ -1,34 +1,51 @@
+<!doctype html>
 <html>
 <head>
+    <link media="screen" href="/css/jquery-ui.css" rel="stylesheet" type="text/css" />
+    <link media="screen" href="/css/jquery-ui.structure.css" rel="stylesheet" type="text/css" />
+    <link media="screen" href="/css/jquery-ui.theme.css" rel="stylesheet" type="text/css" />
     <link media="screen" href="/css/main.css" rel="stylesheet" type="text/css" />
     <title>{{.Title}} - {{.TournamentName}}</title>
     <script type="text/javascript" src="/js/jquery.js"></script>
+    <script type="text/javascript" src="/js/jquery_extensions.js"></script>
+    <script type="text/javascript" src="/js/jquery-ui.js"></script>
     <script type="text/javascript" src="/js/main.js"></script>
 </head>
 <body>
     <h1>{{.TournamentName}}</h1>
+    <a href="/app/mute">Ztlum hudbu</a> | <a href="/app/unmute">Ohul hudbu</a>
+    <div id="sideColumn">
+        <h2>Zápasy</h2>
+    </div>
+    <h2>Jingly</h2>
+    <small class="help">
+        1x klikni &rarr; play/pause<br />
+        2x klikni &rarr; stop<br />
+        3x klikni &rarr; smaž<br />
+    </small>
+    <ul class="metro" id="jingles"></ul>
+    <h2>Aplikace <small>(které se budou ztlumovat)</small></h2>
+    <ul id="apps" class="metro"></ul>
     <form id="addJingle" action="/jingle/add" enctype="multipart/form-data" method="POST" target="downloader">
+        <legend>Přidat song</legend>
         <input type="file" name="file" />
-        <br />
         <select name="play">
             <option value="match_related">Přehrát automaticky</option>
             <option value="no_play">Nepřehrávat automaticky</option>
         </select>
-        <input type="text" name="minutes" /> minut
-        <select name="relative_to" />
-            <option value="before_start">před začátkem</option>
-            <option value="before_end">před koncem</option>
-        </select> každého zápasu
-        <br />
-        <input type="submit" value="Přidat jingle" />
+        <span class="matchOnly">
+            <input type="text" class="shortText" name="minutes" /> minut
+            <select name="relative_to" />
+                <option value="before_start">před začátkem</option>
+                <option value="before_end">před koncem</option>
+            </select> každého zápasu
+        </span>
+        <input type="submit" value="&rarr;" title="přidat" />
     </form>
     <form class="ajax" id="addApp" action="/app/add" method="POST">
-        <input type="text" name="name" /><input type="submit" value="Přidat aplikaci" />
+        <legend>Přidat aplikaci na ztlumení</legend>
+        <input type="text" name="name" /><input type="submit" value="Jop" />
     </form>
-    <a href="/app/mute">Ztlum hudbu</a> | <a href="/app/unmute">Ohul hudbu</a>
-    <div class="metro" id="songs"></div>
-    <div class="metro" id="jingles"></div>
-    <div id="apps"></div>
     <footer>
         <a href="/save" method="GET">Uložit</a> |
         <a method="visit" href="/start">Nový turnaj</a>
