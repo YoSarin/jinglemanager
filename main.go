@@ -59,7 +59,7 @@ func main() {
 
 	web.GET("/css/*filepath", fileHandler.Static)
 	web.GET("/js/*filepath", fileHandler.Static)
-	web.GET("/images/*filepath", fileHandler.Static)
+	web.GET("//images/*filepath", fileHandler.Static)
 
 	web.POST("/track/add", playerHandler.Add)
 	web.GET("/track/list", playerHandler.List)

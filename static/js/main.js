@@ -13,6 +13,10 @@ $(document).ready(function() {
     showHideJingleMatchDetails();
 });
 
+$(window).resize(function (event) {
+    metroResize();
+});
+
 var Handler = {
     "song_changed"   : songChange,
     "app_added"      : appAdd,
@@ -99,6 +103,27 @@ function load() {
     });
 }
 
+function metroResize() {
+    $(".metro").each(function (k, v) {
+        var count = $(this).find("li").length;
+        var width = Math.floor($(this).width() - 0.5);
+        var maxRowItems = Math.floor(width/250);
+        var counter = 0;
+        $(v).find("li").each(function (_, item) {
+            var rowItems = Math.min(maxRowItems, count - (Math.floor(counter / maxRowItems) * maxRowItems));
+            var w =  Math.floor(width / Math.min(rowItems, maxRowItems));
+            $(item).width(w + "px");
+            counter++;
+        });
+    });
+
+    if ($(window).width() < 400) {
+        $("#sideColumn").css("float", "none");
+    } else {
+        $("#sideColumn").css("float", "right");
+    }
+}
+
 function showHideJingleMatchDetails() {
     var v = $("#addJingle select[name=play]").val()
     if (v == "match_related") {
@@ -157,19 +182,23 @@ function appAdd(app) {
     $("#apps")
         .append(
             $('<li id="app-' + app.ID + '" class="app">')
-            .append($('<div class="content">')
-                .append($("<strong>").text(app.Name)).append(" ")
-                .append($('<small class="state">').text("[" + Math.round(100 * app.Volume) + "%]")).append("<br />")
-                .append($('<a class="control" method="delete" href="/app/delete/' + app.ID + '">delete</a>'))
+            .append($('<div class="outer">')
+                .append($('<div class="content">')
+                    .append($("<strong>").text(app.Name)).append(" ")
+                    .append($('<small class="state">').text("[" + Math.round(100 * app.Volume) + "%]")).append("<br />")
+                    .append($('<a class="control" method="delete" href="/app/delete/' + app.ID + '">delete</a>'))
+                )
             )
         ).find("a").each(function (k, v) {
             $(v).prop('onclick', null).off('click');
             $(v).click(clicker);
         });
+    metroResize();
 }
 
 function appRemove(app) {
     $("#app-" + app.ID).remove()
+    metroResize();
 }
 
 function appChange(app) {
@@ -187,14 +216,17 @@ function jingleAdd(jingle) {
         return;
     }
     var newJingle = $('<li id="jingle-' + jingle.Song.ID + '" class="song" time="' + jingle.TimeBeforePoint + '" point="' + jingle.Point + '">')
-        .append($('<div class="progress">').css("width", Math.round(jingle.Song.Position * 100) + "%"))
-        .append($('<div class="content">')
-            .append($("<strong>").text(jingle.Name)).append('<br />')
-            .append($('<small class="songtitle">').text(jingle.Song.File))
+        .append($('<div class="outer">')
+            .append($('<div class="progress">').css("width", Math.round(jingle.Song.Position * 100) + "%"))
+            .append($('<div class="content">')
+                .append($("<strong>").text(jingle.Name)).append('<br />')
+                .append($('<small class="songtitle">').text(jingle.Song.File))
+            )
         ).each(function (k, v) {
             $(v).prop('onclick', null).off('click');
             $(v).multi_click(jinglePlayPause, jingleStop, jingleDelete, 500);
         });
+
     $("#jingles").append(newJingle);
 
     $("#jingles li").each(function (k, v) {
@@ -204,19 +236,25 @@ function jingleAdd(jingle) {
         }
     });
 
-
+    metroResize();
 }
 
 function compareJingles(a, b) {
+    console.log(a,b);
     if (pointOrder[a.attr("point")] > pointOrder[b.attr("point")]) {
+        console.log(1);
         return 1;
     } else if (pointOrder[a.attr("point")] < pointOrder[b.attr("point")]) {
+        console.log(-1);
         return -1;
     } else if (-1*parseInt(a.attr("time")) > -1*parseInt(b.attr("time"))) {
+        console.log(1);
         return 1;
     } else if (-1*parseInt(a.attr("time")) < -1*parseInt(b.attr("time"))) {
+        console.log(-1);
         return -1;
     }
+    console.log(0);
     return 0;
 }
 
@@ -241,6 +279,7 @@ function jingleStop(event) {
 
 function jingleDelete(event) {
     var s = $(this);
+    console.log(s);
     var id = s.attr("id").replace("jingle-", "");
     var url = "/track/delete/" + id;
 
@@ -256,6 +295,7 @@ function jingleChange(jingle) {
 
 function jingleRemove(jingle) {
     $("#jingle-" + jingle.ID).remove()
+    metroResize();
 }
 
 function songChange(song) {

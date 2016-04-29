@@ -7,10 +7,10 @@ body { color: #88f; }
     overflow: auto;
 }
 
-#logs .debug { color: #ccf; }
-#logs .info { color: #cfc; }
+#logs .debug { color: #88c; }
+#logs .info { color: #8c8; }
 #logs .warning { color: #f82; }
-#logs .error { color: #fcc; }
+#logs .error { color: #c88; }
 
 #songs {
     display: none;
@@ -22,36 +22,39 @@ body { color: #88f; }
     height: 5px;
 }
 
-.metro > * > .content {
+.metro > * .content {
     padding: 4px;
     text-align: center;
 }
 
 .metro > * {
-    background-color: #eee;
-    cursor: pointer;
     display: block;
-    min-width: 250px;
-    height: 80px;
-    line-height: 30px;
-    margin: 5px;
     float: left;
     overflow: hidden;
+}
+
+.metro .outer {
+    margin: 5px;
     border: 1px solid #ccc;
+    background-color: #eee;
+    cursor: pointer;
+    height: 80px;
+    line-height: 30px;
 }
 
 .metro {
     overflow: hidden;
     display: block;
     border-bottom: 1px solid #ccc;
-    padding: 4px;
+    margin: 4px;
+    padding: 0px;
     -webkit-user-select: none; /* webkit (safari, chrome) browsers */
     -moz-user-select: none; /* mozilla browsers */
     -khtml-user-select: none; /* webkit (konqueror) browsers */
     -ms-user-select: none; /* IE10+ */
 }
 
-.playing {
+.playing .outer {
     background-color: #efe;
 }
 
@@ -81,5 +84,14 @@ legend {
 #sideColumn {
     float: right;
     width: 30%;
-    height: 600px;
+}
+
+small.help {
+    color: #ccc;
+    font-size: 9px;
+    font-weight: normal;
+}
+
+small.help:hover {
+    color: #000;
 }
