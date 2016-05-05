@@ -56,19 +56,20 @@ func (c *Context) Load(input []byte) {
 	d := &data{}
 	yaml.Unmarshal(input, d)
 
-    if d.Tournament == nil {
-        return;
-    }
+	if d.Tournament == nil {
+		return
+	}
 
-    c.Tournament = d.Tournament
+	c.Tournament = d.Tournament
+	c.Tournament.log = c.Log
 	for _, val := range d.Jingles {
-        s, err := NewSong(val.File, c)
-        if err != nil {
-            c.Log.Error(err.Error())
-        } else {
-            c.Songs.AddUniq(s, c.Log)
-            c.Jingles.AddUniq(NewJingle(val.Name, s, val.TimeBeforePoint, val.Point, c), c.Log)
-        }
+		s, err := NewSong(val.File, c)
+		if err != nil {
+			c.Log.Error(err.Error())
+		} else {
+			c.Songs.AddUniq(s, c.Log)
+			c.Jingles.AddUniq(NewJingle(val.Name, s, val.TimeBeforePoint, val.Point, c), c.Log)
+		}
 	}
 	for _, val := range d.Applications {
 		c.Log.Debug("adding application: " + val)
@@ -119,6 +120,6 @@ func (c *Context) SaveSong(r io.Reader, filename string) (string, error) {
 
 // RemoveSong - will remove song
 func (c *Context) RemoveSong(filename string) error {
-    filepath := path.Join(c.MediaDir(), filename)
-    return os.Remove(filepath)
+	filepath := path.Join(c.MediaDir(), filename)
+	return os.Remove(filepath)
 }

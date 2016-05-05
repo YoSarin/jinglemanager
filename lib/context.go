@@ -25,7 +25,7 @@ func (c *Context) NewTournament(name string) {
 func (c *Context) cleanup() {
 	c.Songs = NewUniqueList()
 	c.Sound = NewSoundController(c.Log)
-	c.Tournament = NewTournament("")
+	c.Tournament = NewTournament("", c.Log)
 	c.Jingles = NewUniqueList()
 	ChannelChange.Emit(EventTypeCleanup, struct{}{})
 }
@@ -39,8 +39,8 @@ func (c *Context) StorageDir() string {
 
 // MediaDir - return path to current tournament directory (and creates path if necessarry)
 func (c *Context) MediaDir() string {
-    p := path.Join(c.StorageDir(), "media")
-    os.MkdirAll(p, 0700)
+	p := path.Join(c.StorageDir(), "media")
+	os.MkdirAll(p, 0700)
 	return p
 }
 

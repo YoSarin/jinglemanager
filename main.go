@@ -4,8 +4,8 @@ import (
 	"flag"
 	"github.com/gorilla/websocket"
 	"github.com/martin-reznik/jinglemanager/lib"
-	"github.com/martin-reznik/jinglemanager/server"
 	"github.com/martin-reznik/jinglemanager/router"
+	"github.com/martin-reznik/jinglemanager/server"
 	"github.com/martin-reznik/logger"
 	"github.com/skratchdot/open-golang/open"
 	"net/http"
@@ -24,13 +24,14 @@ func main() {
 		lib.ChannelLog.Emit(lib.EventTypeLog, line)
 		line.Print()
 	}, &logger.Config{GoRoutinesLogTicker: 5 * time.Second})
+
 	log.LogSeverity[logger.DEBUG] = true
 
 	Ctx := &lib.Context{
 		Log:        log,
 		Songs:      lib.NewUniqueList(),
 		Sound:      lib.NewSoundController(log),
-		Tournament: lib.NewTournament(""),
+		Tournament: lib.NewTournament("", log),
 		Jingles:    lib.NewUniqueList(),
 	}
 
@@ -41,17 +42,30 @@ func main() {
 
 	Ctx.LoadByName(Ctx.LastTournament())
 
+	tz, _ := time.LoadLocation("Local")
+
+	Ctx.Tournament.AddMatchSlot(lib.NewMatchSlot(
+		time.Date(2016, 8, 14, 9, 0, 0, 0, tz),
+		55*time.Minute,
+	))
+
+	Ctx.Tournament.AddMatchSlot(lib.NewMatchSlot(
+		time.Now().Add(10*time.Second),
+		5*time.Minute,
+	))
+
 	httpHandler := server.HTTPHandler{Context: Ctx}
 	fileHandler := server.FileProxyHandler{Context: Ctx}
 	playerHandler := server.PlayerHandler{Context: Ctx}
 	jingleHandler := server.JingleHandler{Context: Ctx}
 	controlHandler := server.SoundControlHandler{Context: Ctx}
+	slotHandler := server.SlotHandler{Context: Ctx}
 	storageHandler := server.StorageHandler{Context: Ctx}
 	socketHandler := server.SocketHandler{Context: Ctx, Upgrader: &websocket.Upgrader{}}
 
 	web := router.NewRouter(log)
 
-    web.AddMiddleware(router.NewAuthMiddleware(log))
+	web.AddMiddleware(router.NewAuthMiddleware(log))
 
 	web.GET("/", httpHandler.Index)
 	web.GET("/start", httpHandler.Start)
@@ -76,6 +90,8 @@ func main() {
 	web.POST("/app/add", controlHandler.Add)
 	web.DELETE("/app/delete/:id", controlHandler.Delete)
 	web.GET("/app/list", controlHandler.List)
+
+	web.POST("/slot/add", slotHandler.Add)
 
 	web.GET("/save", storageHandler.Save)
 	web.POST("/load", storageHandler.Load)
@@ -110,7 +126,7 @@ func main() {
 		for signal := range c {
 			switch signal {
 			case os.Interrupt:
-                log.Warning("Server is done - finishing")
+				log.Warning("Server is done - finishing")
 				Ctx.Save()
 				return
 			}
