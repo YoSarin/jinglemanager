@@ -10,5 +10,16 @@ type Match struct {
 	Duration time.Duration
 	Field    int
 	HomeTeam *Team
-	Awayteam *Team
+	AwayTeam *Team
+}
+
+// NewMatch - will create new match
+func NewMatch(startTime time.Time, duration time.Duration, field int, homeTeam *Team, awayTeam *Team) *Match {
+	return &Match{
+		StartsAt: startTime,
+		Duration: duration,
+		Field:    field,
+		HomeTeam: homeTeam,
+		AwayTeam: awayTeam,
+	}
 }

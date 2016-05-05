@@ -2,9 +2,9 @@ package lib
 
 // LogI - intrface for logger
 type LogI interface {
-	Info(string)
-	Warning(string)
-	Error(string)
-	Debug(string)
-	Notice(string)
+	Info(string, ...interface{})
+	Warning(string, ...interface{})
+	Error(string, ...interface{})
+	Debug(string, ...interface{})
+	Notice(string, ...interface{})
 }
