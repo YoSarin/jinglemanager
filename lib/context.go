@@ -16,6 +16,20 @@ type Context struct {
 	Tournament *Tournament
 }
 
+var context *Context
+
+func NewContext(log LogI) *Context {
+	Ctx := &Context{}
+
+	Ctx.Log = log
+	Ctx.Songs = NewUniqueList()
+	Ctx.Sound = NewSoundController(log)
+	Ctx.Tournament = NewTournament("", Ctx)
+	Ctx.Jingles = NewUniqueList()
+
+	return Ctx
+}
+
 // NewTournament - will prepare context for new tournament
 func (c *Context) NewTournament(name string) {
 	c.cleanup()
@@ -25,7 +39,7 @@ func (c *Context) NewTournament(name string) {
 func (c *Context) cleanup() {
 	c.Songs = NewUniqueList()
 	c.Sound = NewSoundController(c.Log)
-	c.Tournament = NewTournament("", c.Log)
+	c.Tournament = NewTournament("", c)
 	c.Jingles = NewUniqueList()
 	ChannelChange.Emit(EventTypeCleanup, struct{}{})
 }

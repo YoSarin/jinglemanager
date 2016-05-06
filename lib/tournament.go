@@ -7,8 +7,8 @@ import (
 // Tournament - struct holding data about tournament
 type Tournament struct {
 	Name       string
-	log        LogI
 	MatchSlots []*MatchSlot
+	Context    *Context
 }
 
 // TournamentConfig - config for creating tournament schedule
@@ -18,11 +18,11 @@ type TournamentConfig struct {
 }
 
 // NewTournament - will create new tournament
-func NewTournament(name string, log LogI) *Tournament {
+func NewTournament(name string, context *Context) *Tournament {
 
 	t := &Tournament{
 		Name:       name,
-		log:        log,
+		Context:    context,
 		MatchSlots: []*MatchSlot{},
 	}
 
@@ -38,6 +38,11 @@ func (t *Tournament) AddMatchSlot(m *MatchSlot) {
 		}
 	}
 	t.MatchSlots = append(t.MatchSlots, m)
+	for _, j := range t.Context.Jingles.JingleList() {
+		m.Notify(j.TimeBeforePoint, j.Point, func() {
+			t.Context.Log.Info("Kaboom!")
+		})
+	}
 }
 
 // SetName - will set new name for tournament

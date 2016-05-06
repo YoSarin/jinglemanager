@@ -31,3 +31,14 @@ func (m *MatchSlot) Overlaps(m2 MatchSlot) bool {
 	}
 	return false
 }
+
+func (m *MatchSlot) Notify(d time.Duration, p MatchPoint, notifier func()) {
+	var dur time.Duration
+	if p == MatchStart {
+		dur = -1 * time.Since(m.StartsAt.Add(d))
+	} else {
+		dur = -1 * time.Since(m.StartsAt.Add(d).Add(m.Duration))
+	}
+
+	time.AfterFunc(dur, notifier)
+}

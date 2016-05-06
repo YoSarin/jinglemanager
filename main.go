@@ -27,13 +27,7 @@ func main() {
 
 	log.LogSeverity[logger.DEBUG] = true
 
-	Ctx := &lib.Context{
-		Log:        log,
-		Songs:      lib.NewUniqueList(),
-		Sound:      lib.NewSoundController(log),
-		Tournament: lib.NewTournament("", log),
-		Jingles:    lib.NewUniqueList(),
-	}
+	Ctx := &lib.NewContext(log)
 
 	defer func() {
 		Ctx.Save()
