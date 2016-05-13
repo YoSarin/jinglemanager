@@ -32,7 +32,7 @@
 		},
 		{
 			"ImportPath": "github.com/martin-reznik/logger",
-			"Rev": "47cbbd8f6b84f06c29129a1b4e55fc09e4e42ebd"
+			"Rev": "17689f3ecfb1d940bfed0a5630d28cba4c389269"
 		},
 		{
 			"ImportPath": "github.com/mattn/go-colorable",
