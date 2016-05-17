@@ -61,7 +61,7 @@ func (c *Context) Load(input []byte) {
 	}
 
 	c.Tournament = d.Tournament
-	c.Tournament.log = c.Log
+	c.Tournament.context = c
 	for _, val := range d.Jingles {
 		s, err := NewSong(val.File, c)
 		if err != nil {

@@ -240,21 +240,15 @@ function jingleAdd(jingle) {
 }
 
 function compareJingles(a, b) {
-    console.log(a,b);
     if (pointOrder[a.attr("point")] > pointOrder[b.attr("point")]) {
-        console.log(1);
         return 1;
     } else if (pointOrder[a.attr("point")] < pointOrder[b.attr("point")]) {
-        console.log(-1);
         return -1;
     } else if (-1*parseInt(a.attr("time")) > -1*parseInt(b.attr("time"))) {
-        console.log(1);
         return 1;
     } else if (-1*parseInt(a.attr("time")) < -1*parseInt(b.attr("time"))) {
-        console.log(-1);
         return -1;
     }
-    console.log(0);
     return 0;
 }
 

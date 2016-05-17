@@ -10,7 +10,7 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
-    "path"
+	"path"
 )
 
 // Song - queue item containing info about playing sound
@@ -24,12 +24,29 @@ type Song struct {
 	bytesTotal   int64
 	stopPlayback chan bool
 	done         chan bool
-    context      *Context
+	context      *Context
 }
+
+const (
+	// EventTypeSongChange - event type related to song change
+	EventTypeSongChange = EventType("song_changed")
+	// EventTypeSongAdded - event type related to song change
+	EventTypeSongAdded = EventType("song_added")
+	// EventTypeSongRemoved - event type related to song change
+	EventTypeSongRemoved = EventType("song_removed")
+)
+
+var (
+	ChannelSong = Channel{name: "song", allowed: map[EventType]bool{
+		EventTypeSongChange:  true,
+		EventTypeSongAdded:   true,
+		EventTypeSongRemoved: true,
+	}}
+)
 
 // NewSong - creates new song
 func NewSong(filename string, c *Context) (*Song, error) {
-    filepath := path.Join(c.MediaDir(), filename)
+	filepath := path.Join(c.MediaDir(), filename)
 
 	if _, err := os.Stat(filepath); os.IsNotExist(err) {
 		return nil, fmt.Errorf("File %v does not exist", filepath)
@@ -37,7 +54,7 @@ func NewSong(filename string, c *Context) (*Song, error) {
 
 	stream, ao := getMusicStream(filepath)
 
-    s := &Song{
+	s := &Song{
 		id:           fmt.Sprintf("%x", md5.Sum(stream)),
 		File:         filename,
 		stream:       stream,
@@ -47,18 +64,18 @@ func NewSong(filename string, c *Context) (*Song, error) {
 		bytesTotal:   int64(len(stream)),
 		stopPlayback: make(chan bool, 1),
 		done:         make(chan bool, 1),
-        context:      c,
+		context:      c,
 	}
 
-    ChannelChange.Emit(EventTypeSongAdded, s)
+	ChannelSong.Emit(EventTypeSongAdded, s)
 	return s, nil
 }
 
 // OnRemove - will trigger actions related to removal of song from File List
 func (s *Song) OnRemove() {
 	s.Stop()
-    s.context.RemoveSong(s.FileName())
-	ChannelChange.Emit(EventTypeSongRemoved, s)
+	s.context.RemoveSong(s.FileName())
+	ChannelSong.Emit(EventTypeSongRemoved, s)
 }
 
 // MarshalJSON - will convert song to JSON
@@ -87,7 +104,7 @@ func (s *Song) Play() {
 		return
 	}
 	s.playing = true
-	ChannelChange.Emit(EventTypeSongChange, s)
+	ChannelSong.Emit(EventTypeSongChange, s)
 
 	go func() {
 		defer s.playbackDone()
@@ -112,14 +129,14 @@ func (s *Song) Play() {
 				}
 				s.bytesPlayed += int64(size)
 				if lastlyReported+reportingTreshold < s.bytesPlayed {
-					ChannelChange.Emit(EventTypeSongChange, s)
+					ChannelSong.Emit(EventTypeSongChange, s)
 					lastlyReported = s.bytesPlayed
 				}
 			}
 		}
 		s.playing = false
 		s.bytesPlayed = 0
-		ChannelChange.Emit(EventTypeSongChange, s)
+		ChannelSong.Emit(EventTypeSongChange, s)
 	}()
 }
 
@@ -128,7 +145,7 @@ func (s *Song) Stop() {
 	s.Pause()
 	// reset where we were in song to 0
 	s.bytesPlayed = 0
-	ChannelChange.Emit(EventTypeSongChange, s)
+	ChannelSong.Emit(EventTypeSongChange, s)
 }
 
 // Pause - pauses playing, so it can be resumed from the point where it was stopped
@@ -140,8 +157,8 @@ func (s *Song) Pause() {
 	s.stopPlayback <- true
 	// wait for confirmation that playback has stopped
 	_ = <-s.done
-    s.playing = false
-	ChannelChange.Emit(EventTypeSongChange, s)
+	s.playing = false
+	ChannelSong.Emit(EventTypeSongChange, s)
 }
 
 // Position - percentage of file played (based on size)

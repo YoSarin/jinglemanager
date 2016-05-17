@@ -67,5 +67,5 @@ type FileProxyHandler struct {
 // Static - handler for static content
 func (f *FileProxyHandler) Static(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	path := fmt.Sprintf("static%v", r.URL.Path)
-    http.ServeFile(w, r, path)
+	http.ServeFile(w, r, path)
 }

@@ -16,7 +16,15 @@ type Context struct {
 	Tournament *Tournament
 }
 
-var context *Context
+const (
+	// EventTypeCleanup - event type related to total cleanup
+	EventTypeCleanup = EventType("cleanup")
+)
+
+var (
+	context        *Context
+	ChannelCleanup = Channel{name: "cleanup", allowed: map[EventType]bool{EventTypeCleanup: true}}
+)
 
 func NewContext(log LogI) *Context {
 	Ctx := &Context{}
@@ -41,7 +49,7 @@ func (c *Context) cleanup() {
 	c.Sound = NewSoundController(c.Log)
 	c.Tournament = NewTournament("", c)
 	c.Jingles = NewUniqueList()
-	ChannelChange.Emit(EventTypeCleanup, struct{}{})
+	ChannelCleanup.Emit(EventTypeCleanup, struct{}{})
 }
 
 // StorageDir - return path to current tournament directory (and creates path if necessarry)

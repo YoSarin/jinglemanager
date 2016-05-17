@@ -16,12 +16,12 @@ type PlayerHandler struct {
 func (p *PlayerHandler) Add(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	r.ParseForm()
 	songFile := r.FormValue("filename")
-    s, err := lib.NewSong(songFile, p.Context)
-    if err != nil {
-        p.Context.Log.Error(err.Error())
-    } else {
-        p.Context.Songs.AddUniq(s, p.Context.Log)
-    }
+	s, err := lib.NewSong(songFile, p.Context)
+	if err != nil {
+		p.Context.Log.Error(err.Error())
+	} else {
+		p.Context.Songs.AddUniq(s, p.Context.Log)
+	}
 	output, _ := json.Marshal(p.Context.Songs.GetAll())
 	w.Write(output)
 }

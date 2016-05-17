@@ -24,15 +24,15 @@ func (h *SocketHandler) HandleChangeSocket(w http.ResponseWriter, r *http.Reques
 	}
 	defer c.Close()
 
-	changeListener, deferFunc := lib.ChannelChange.Subscribe()
+	changeListener, deferFunc := lib.MultiSubscribe([]*lib.Channel{&lib.ChannelApp, &lib.ChannelJingle, &lib.ChannelSong, &lib.ChannelTournament})
 	defer deferFunc()
-
+	c.WriteJSON("Starting")
 	for {
 		select {
 		case m := <-changeListener:
 			err := c.WriteJSON(m)
 			if err != nil {
-				h.Context.Log.Error("Write error closing sock: " + err.Error())
+				h.Context.Log.Error("Write error closing sock: %v", err.Error())
 				return
 			}
 		}

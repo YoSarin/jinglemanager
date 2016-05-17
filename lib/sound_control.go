@@ -23,6 +23,19 @@ type App struct {
 	specificData interface{}
 }
 
+const (
+	// EventTypeVolumeChange - event type related to apps volume change
+	EventTypeVolumeChange = EventType("volume_changed")
+	// EventTypeAppAdded - event type related to app list change
+	EventTypeAppAdded = EventType("app_added")
+	// EventTypeAppRemoved - event type related to app list change
+	EventTypeAppRemoved = EventType("app_removed")
+)
+
+var (
+	ChannelApp = Channel{name: "app", allowed: map[EventType]bool{EventTypeVolumeChange: true, EventTypeAppAdded: true, EventTypeAppRemoved: true}}
+)
+
 // NewSoundController - will create new sound controller
 func NewSoundController(logger LogI) *SoundController {
 	return &SoundController{
@@ -43,7 +56,7 @@ func (c *SoundController) MuteApps() {
 			go func(app *App) {
 				app.setAppVolume(level)
 				app.Volume = level
-				ChannelChange.Emit(EventTypeVolumeChange, app)
+				ChannelApp.Emit(EventTypeVolumeChange, app)
 			}(app)
 		}
 		time.Sleep(100 * time.Millisecond)
@@ -59,7 +72,7 @@ func (c *SoundController) UnMuteApps() {
 			go func(app *App) {
 				app.setAppVolume(level)
 				app.Volume = level
-				ChannelChange.Emit(EventTypeVolumeChange, app)
+				ChannelApp.Emit(EventTypeVolumeChange, app)
 			}(app)
 		}
 		time.Sleep(100 * time.Millisecond)
@@ -72,7 +85,7 @@ func (c *SoundController) Add(appname string) {
 	a := &App{id, appname, 1.0, nil}
 	a.platformSpecificStuff()
 	c.appList[id] = a
-	ChannelChange.Emit(EventTypeAppAdded, a)
+	ChannelApp.Emit(EventTypeAppAdded, a)
 }
 
 // AddUniq - Will add an application to controller
@@ -94,7 +107,7 @@ func (c *SoundController) AppNames() []string {
 
 // Remove - will remove an application from controller
 func (c *SoundController) Remove(id string) {
-	ChannelChange.Emit(EventTypeAppRemoved, c.appList[id])
+	ChannelApp.Emit(EventTypeAppRemoved, c.appList[id])
 	delete(c.appList, id)
 }
 

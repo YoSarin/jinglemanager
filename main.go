@@ -19,7 +19,6 @@ import (
 func main() {
 	flagDoNotOpenBrowser := flag.Bool("no-browser", false, "do not open browser")
 	flag.Parse()
-
 	log := logger.NewLog(func(line *logger.LogLine) {
 		lib.ChannelLog.Emit(lib.EventTypeLog, line)
 		line.Print()
@@ -27,7 +26,7 @@ func main() {
 
 	log.LogSeverity[logger.DEBUG] = true
 
-	Ctx := &lib.NewContext(log)
+	Ctx := lib.NewContext(log)
 
 	defer func() {
 		Ctx.Save()
@@ -67,7 +66,7 @@ func main() {
 
 	web.GET("/css/*filepath", fileHandler.Static)
 	web.GET("/js/*filepath", fileHandler.Static)
-	web.GET("//images/*filepath", fileHandler.Static)
+	web.GET("/images/*filepath", fileHandler.Static)
 
 	web.POST("/track/add", playerHandler.Add)
 	web.GET("/track/list", playerHandler.List)
@@ -86,6 +85,7 @@ func main() {
 	web.GET("/app/list", controlHandler.List)
 
 	web.POST("/slot/add", slotHandler.Add)
+	web.GET("/slot/list", slotHandler.List)
 
 	web.GET("/save", storageHandler.Save)
 	web.POST("/load", storageHandler.Load)

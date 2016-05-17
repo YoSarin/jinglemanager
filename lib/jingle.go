@@ -1,9 +1,20 @@
 package lib
 
 import (
-	"time"
-    "fmt"
 	"encoding/json"
+	"fmt"
+	"time"
+)
+
+const (
+	// EventTypeJingleAdded - event type related to jingle change
+	EventTypeJingleAdded = EventType("jingle_added")
+	// EventTypeJingleRemoved - event type related to jingle change
+	EventTypeJingleRemoved = EventType("jingle_removed")
+)
+
+var (
+	ChannelJingle = Channel{name: "jingle", allowed: map[EventType]bool{EventTypeJingleAdded: true, EventTypeJingleRemoved: true}}
 )
 
 // MatchPoint - point of match
@@ -14,8 +25,8 @@ const (
 	MatchStart = MatchPoint("match_start")
 	// MatchEnd - end of match
 	MatchEnd = MatchPoint("match_end")
-    // MatchNone - no match related
-    MatchNone = MatchPoint("match_none")
+	// MatchNone - no match related
+	MatchNone = MatchPoint("match_none")
 )
 
 // Jingle - holds info about jingle (song, timing and so)
@@ -24,28 +35,28 @@ type Jingle struct {
 	Name            string
 	TimeBeforePoint time.Duration
 	Point           MatchPoint
-    Context         *Context
+	Context         *Context
 }
 
 // JingleStorage - struct used for storage
 type JingleStorage struct {
-    Name string
-    File string
-    Point MatchPoint
-    TimeBeforePoint time.Duration
+	Name            string
+	File            string
+	Point           MatchPoint
+	TimeBeforePoint time.Duration
 }
 
 // NewJingle - will create new Jingle
 func NewJingle(name string, song *Song, timeBeforePoint time.Duration, point MatchPoint, ctx *Context) *Jingle {
 	j := &Jingle{
-        Song:            song,
+		Song:            song,
 		Name:            name,
 		TimeBeforePoint: timeBeforePoint,
 		Point:           point,
-        Context: ctx,
+		Context:         ctx,
 	}
 
-	ChannelChange.Emit(EventTypeJingleAdded, j)
+	ChannelJingle.Emit(EventTypeJingleAdded, j)
 
 	return j
 }
@@ -53,11 +64,11 @@ func NewJingle(name string, song *Song, timeBeforePoint time.Duration, point Mat
 // MarshalJSON - will convert song to JSON
 func (j *Jingle) MarshalJSON() ([]byte, error) {
 	data := struct {
-		ID        string
-		Song      *Song
-		Name      string
-		Point     MatchPoint
-        TimeBeforePoint time.Duration
+		ID              string
+		Song            *Song
+		Name            string
+		Point           MatchPoint
+		TimeBeforePoint time.Duration
 	}{
 		j.ID(), j.Song, j.Name, j.Point, j.TimeBeforePoint,
 	}
@@ -76,12 +87,12 @@ func (j *Jingle) Play() {
 
 // ToJingleStorage - will play jingle
 func (j *Jingle) ToJingleStorage() *JingleStorage {
-    return &JingleStorage{
-        Name: j.Name,
-        TimeBeforePoint: j.TimeBeforePoint,
-        File: j.Song.FileName(),
-        Point: j.Point,
-    }
+	return &JingleStorage{
+		Name:            j.Name,
+		TimeBeforePoint: j.TimeBeforePoint,
+		File:            j.Song.FileName(),
+		Point:           j.Point,
+	}
 }
 
 // JingleList - will convert UniqueList into array of Jingles
@@ -112,7 +123,6 @@ func (l *UniqueList) JingleStorageList() []*JingleStorage {
 	return out
 }
 
-
 // JingleName - will compose name of jingle
 func JingleName(relativeTo string, dur time.Duration) (out string, point MatchPoint) {
 	switch relativeTo {
@@ -136,5 +146,5 @@ func JingleName(relativeTo string, dur time.Duration) (out string, point MatchPo
 
 // OnRemove - callback for removal form list
 func (j *Jingle) OnRemove() {
-    ChannelChange.Emit(EventTypeJingleRemoved, j)
+	ChannelJingle.Emit(EventTypeJingleRemoved, j)
 }
