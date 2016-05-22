@@ -82,7 +82,11 @@ func (j Jingle) ID() string {
 
 // Play - will play jingle
 func (j *Jingle) Play() {
-	j.Song.Play()
+	j.Context.Log.Info("Going to play jingle %v", j.Name)
+	j.Context.Sound.MuteApps()
+	j.Song.Play(func() {
+		j.Context.Sound.UnMuteApps()
+	})
 }
 
 // ToJingleStorage - will play jingle

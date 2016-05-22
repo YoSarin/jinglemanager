@@ -79,6 +79,17 @@ func (c *SoundController) UnMuteApps() {
 	}
 }
 
+// ReleaseApps - Will imediately unmute all apps, blocking
+func (c *SoundController) ReleaseApps() {
+	c.refresh()
+	level := float32(1)
+	for _, app := range c.appList {
+		app.setAppVolume(level)
+		app.Volume = level
+		ChannelApp.Emit(EventTypeVolumeChange, app)
+	}
+}
+
 // Add - Will add an application to controller
 func (c *SoundController) Add(appname string) {
 	id := fmt.Sprintf("%x", md5.Sum([]byte(appname)))

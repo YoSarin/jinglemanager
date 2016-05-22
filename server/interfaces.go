@@ -11,7 +11,7 @@ type LogI interface {
 
 // SongI - interface used to play songs
 type SongI interface {
-	Play()
+	Play(func())
 	Pause()
 	Stop()
 	IsPlaying() bool

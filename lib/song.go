@@ -99,7 +99,7 @@ func (s *Song) IsPlaying() bool {
 }
 
 // Play - plays song
-func (s *Song) Play() {
+func (s *Song) Play(onPlayDone func()) {
 	if s.IsPlaying() {
 		return
 	}
@@ -108,6 +108,7 @@ func (s *Song) Play() {
 
 	go func() {
 		defer s.playbackDone()
+		defer onPlayDone()
 
 		ao.Initialize()
 		// defer ao.Shutdown()

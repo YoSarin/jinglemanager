@@ -17,7 +17,7 @@ import (
 )
 
 func main() {
-	flagDoNotOpenBrowser := flag.Bool("no-browser", false, "do not open browser")
+	flagOpenBrowser := flag.Bool("browser", false, "do open browser")
 	flag.Parse()
 	log := logger.NewLog(func(line *logger.LogLine) {
 		lib.ChannelLog.Emit(lib.EventTypeLog, line)
@@ -27,24 +27,22 @@ func main() {
 	log.LogSeverity[logger.DEBUG] = true
 
 	Ctx := lib.NewContext(log)
-
-	defer func() {
-		Ctx.Save()
-		log.Close()
-	}()
-
 	Ctx.LoadByName(Ctx.LastTournament())
+
+	defer Ctx.AppClosed()
 
 	tz, _ := time.LoadLocation("Local")
 
 	Ctx.Tournament.AddMatchSlot(lib.NewMatchSlot(
 		time.Date(2016, 8, 14, 9, 0, 0, 0, tz),
 		55*time.Minute,
+		Ctx,
 	))
 
 	Ctx.Tournament.AddMatchSlot(lib.NewMatchSlot(
-		time.Now().Add(10*time.Second),
+		time.Now().Add(30*time.Second),
 		5*time.Minute,
+		Ctx,
 	))
 
 	httpHandler := server.HTTPHandler{Context: Ctx}
@@ -120,8 +118,6 @@ func main() {
 		for signal := range c {
 			switch signal {
 			case os.Interrupt:
-				log.Warning("Server is done - finishing")
-				Ctx.Save()
 				return
 			}
 		}
@@ -129,7 +125,7 @@ func main() {
 
 	log.Info("Server is up and running, open 'http://localhost:8080' in your browser")
 
-	if !*flagDoNotOpenBrowser {
+	if *flagOpenBrowser {
 		open.Start("http://localhost:8080")
 	}
 	wg.Wait()

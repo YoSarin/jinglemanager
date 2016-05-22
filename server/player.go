@@ -32,11 +32,15 @@ func (p *PlayerHandler) Play(w http.ResponseWriter, r *http.Request, ps httprout
 	f, err := p.Context.Songs.Find(id)
 	s, ok := f.(SongI)
 	if err != nil || !ok {
-		p.Context.Log.Error(err.Error())
+		if err != nil {
+			p.Context.Log.Error(err.Error())
+		} else {
+			p.Context.Log.Error("error converting interface")
+		}
 		http.NotFound(w, r)
 		return
 	}
-	s.Play()
+	s.Play(func() {})
 
 	output, _ := json.Marshal(p.Context.Songs.GetAll())
 	w.Write(output)

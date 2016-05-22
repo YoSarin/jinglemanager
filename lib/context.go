@@ -52,6 +52,13 @@ func (c *Context) cleanup() {
 	ChannelCleanup.Emit(EventTypeCleanup, struct{}{})
 }
 
+func (c *Context) AppClosed() {
+	c.Sound.ReleaseApps()
+	c.Log.Info("Apps released")
+	c.Save()
+	c.Log.Close()
+}
+
 // StorageDir - return path to current tournament directory (and creates path if necessarry)
 func (c *Context) StorageDir() string {
 	p := path.Join(c.AppDir(), c.Tournament.Name)

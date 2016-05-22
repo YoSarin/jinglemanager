@@ -8,7 +8,12 @@ import (
 )
 
 func (a *App) setAppVolume(level float32) bool {
-	err := exec.Command("nircmdc.exe", "setappvolume", a.Name, fmt.Sprintf("%.2f", level)).Run()
+	cmd := exec.Command("nircmdc.exe", "setappvolume", a.Name, fmt.Sprintf("%.2f", level))
+	err := cmd.Start()
+	if err != nil {
+		return false
+	}
+	err = cmd.Wait()
 	if err != nil {
 		return false
 	}

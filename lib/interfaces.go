@@ -7,4 +7,5 @@ type LogI interface {
 	Error(string, ...interface{})
 	Debug(string, ...interface{})
 	Notice(string, ...interface{})
+	Close()
 }

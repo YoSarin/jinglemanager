@@ -7,8 +7,13 @@ import (
 // Tournament - struct holding data about tournament
 type Tournament struct {
 	Name       string
-	MatchSlots []*MatchSlot
+	MatchSlots []*TournamentMatchSlot
 	context    *Context
+}
+
+type TournamentMatchSlot struct {
+	*MatchSlot
+	place int
 }
 
 // TournamentConfig - config for creating tournament schedule
@@ -43,7 +48,7 @@ func NewTournament(name string, context *Context) *Tournament {
 	t := &Tournament{
 		Name:       name,
 		context:    context,
-		MatchSlots: []*MatchSlot{},
+		MatchSlots: []*TournamentMatchSlot{},
 	}
 
 	ChannelTournament.Emit(EventTypeTournamentChange, t)
@@ -52,18 +57,43 @@ func NewTournament(name string, context *Context) *Tournament {
 
 // AddMatchSlot - will add an match to Tournament
 func (t *Tournament) AddMatchSlot(m *MatchSlot) {
+	if m == nil {
+		return
+	}
 	for _, s := range t.MatchSlots {
 		if s.Overlaps(*m) {
 			return
 		}
 	}
-	t.MatchSlots = append(t.MatchSlots, m)
+	s := &TournamentMatchSlot{m, len(t.MatchSlots)}
+	t.MatchSlots = append(t.MatchSlots, s)
 	for _, j := range t.context.Jingles.JingleList() {
-		m.Notify(j.TimeBeforePoint, j.Point, func() {
-			j.Play()
-		})
+		m.Notify(j.TimeBeforePoint, j.Point, j.Play)
 	}
-	ChannelTournament.Emit(EventTypeMatchSlotAdded, m)
+	ChannelTournament.Emit(EventTypeMatchSlotAdded, struct {
+		Slot  *TournamentMatchSlot
+		Place int
+	}{
+		Slot:  s,
+		Place: s.place,
+	})
+}
+
+// RemoveMatchSlot - will set new name for tournament
+func (t *Tournament) RemoveMatchSlot(place int) {
+	t.MatchSlots[place].Cancel()
+	t.MatchSlots[place] = nil
+	ChannelTournament.Emit(EventTypeMatchSlotRemoved, place)
+}
+
+// PlanJingles - will plan jingles
+func (t *Tournament) PlanJingles() {
+	for _, m := range t.MatchSlots {
+		for _, j := range t.context.Jingles.JingleList() {
+			m.Cancel()
+			m.Notify(j.TimeBeforePoint, j.Point, j.Play)
+		}
+	}
 }
 
 // SetName - will set new name for tournament

@@ -6,15 +6,18 @@ import (
 
 // MatchSlot - struct holds info about matches
 type MatchSlot struct {
-	StartsAt time.Time
-	Duration time.Duration
+	StartsAt  time.Time
+	Duration  time.Duration
+	notifiers []*time.Timer
+	context   *Context
 }
 
 // NewMatchSlot - will create new match
-func NewMatchSlot(startTime time.Time, duration time.Duration) *MatchSlot {
+func NewMatchSlot(startTime time.Time, duration time.Duration, ctx *Context) *MatchSlot {
 	slot := &MatchSlot{
 		StartsAt: startTime,
 		Duration: duration,
+		context:  ctx,
 	}
 	return slot
 }
@@ -39,6 +42,14 @@ func (m *MatchSlot) Notify(d time.Duration, p MatchPoint, notifier func()) {
 	} else {
 		dur = -1 * time.Since(m.StartsAt.Add(d).Add(m.Duration))
 	}
+	if dur > 0 {
+		m.context.Log.Info("Scheduling jingle to play in %v", dur)
+		m.notifiers = append(m.notifiers, time.AfterFunc(dur, notifier))
+	}
+}
 
-	time.AfterFunc(dur, notifier)
+func (m *MatchSlot) Cancel() {
+	for _, t := range m.notifiers {
+		t.Stop()
+	}
 }
