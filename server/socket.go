@@ -32,7 +32,7 @@ func (h *SocketHandler) HandleChangeSocket(w http.ResponseWriter, r *http.Reques
 		case m := <-changeListener:
 			err := c.WriteJSON(m)
 			if err != nil {
-				h.Context.Log.Error("Write error closing sock: " + err.Error())
+				h.Context.Log.Debug("Write error closing sock: " + err.Error())
 				return
 			}
 		}

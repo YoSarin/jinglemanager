@@ -79,7 +79,6 @@ func (c *Context) Archive() {
 			c.Log.Error(err.Error())
 		}
 		p := path.Join(c.StorageDir(), file)
-		c.Log.Info("adding path %v", p)
 		data, _ := ioutil.ReadFile(p)
 		_, err = zf.Write([]byte(data))
 		if err != nil {

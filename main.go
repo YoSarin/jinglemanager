@@ -18,13 +18,16 @@ import (
 
 func main() {
 	flagOpenBrowser := flag.Bool("browser", false, "do open browser")
+	flagDebug := flag.Bool("debug", false, "log verbosity: debug")
 	flag.Parse()
 	log := logger.NewLog(func(line *logger.LogLine) {
 		lib.ChannelLog.Emit(lib.EventTypeLog, line)
 		line.Print()
 	}, &logger.Config{GoRoutinesLogTicker: 5 * time.Second})
 
-	log.LogSeverity[logger.DEBUG] = true
+	if *flagDebug {
+		log.LogSeverity[logger.DEBUG] = true
+	}
 
 	Ctx := lib.NewContext(log)
 	Ctx.LoadCurrent()
@@ -97,7 +100,7 @@ func main() {
 		for {
 			select {
 			case <-ticker.C:
-				log.Info("GC run")
+				log.Debug("GC run")
 				runtime.GC()
 			}
 		}

@@ -47,7 +47,7 @@ func (m *MatchSlot) Notify(j *Jingle) {
 		dur = -1 * time.Since(m.StartsAt.Add(d).Add(m.Duration))
 	}
 	if dur > 0 {
-		m.context.Log.Info("Scheduling jingle '%v' to play at %v", j.Name, time.Now().Add(dur))
+		m.context.Log.Info("Scheduling jingle: %v -> '%v'", time.Now().Add(dur), j.Name)
 		m.notifiers = append(m.notifiers, time.AfterFunc(dur, j.Play))
 	}
 }

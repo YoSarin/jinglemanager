@@ -36,7 +36,7 @@ func (r *Router) AddMiddleware(m MiddlewareI) {
 
 func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	// perform middleware actions here
-	r.Log.Info("You're hitting " + req.URL.String())
+	r.Log.Debug("You're hitting " + req.URL.String())
 	for _, m := range r.middlewares {
 		if m.ShouldPerform(req) {
 			err := m.Perform(req)
