@@ -11,6 +11,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path"
+	"time"
 )
 
 // Song - queue item containing info about playing sound
@@ -72,7 +73,7 @@ func NewSong(filename string, c *Context) (*Song, error) {
 }
 
 // OnRemove - will trigger actions related to removal of song from File List
-func (s *Song) OnRemove() {
+func (s Song) OnRemove() {
 	s.Stop()
 	s.context.RemoveSong(s.FileName())
 	ChannelSong.Emit(EventTypeSongRemoved, s)
@@ -121,6 +122,7 @@ func (s *Song) Play(onPlayDone func()) {
 		for step := int64(s.bytesPlayed / bufSize); step < s.bytesTotal/bufSize; step++ {
 			select {
 			case <-s.stopPlayback:
+				s.context.Log.Info("Done at %v", time.Now())
 				return
 			default:
 				size, err := dev.Write(s.stream[step*bufSize : (step+1)*bufSize])
@@ -154,6 +156,8 @@ func (s *Song) Pause() {
 	if !s.IsPlaying() {
 		return
 	}
+
+	s.context.Log.Info("Asked to stop song at %v", time.Now())
 
 	s.stopPlayback <- true
 	// wait for confirmation that playback has stopped

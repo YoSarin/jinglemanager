@@ -31,19 +31,13 @@ func main() {
 
 	defer Ctx.AppClosed()
 
-	tz, _ := time.LoadLocation("Local")
-
-	Ctx.Tournament.AddMatchSlot(lib.NewMatchSlot(
-		time.Date(2016, 8, 14, 9, 0, 0, 0, tz),
-		55*time.Minute,
-		Ctx,
-	))
-
-	Ctx.Tournament.AddMatchSlot(lib.NewMatchSlot(
-		time.Now().Add(30*time.Second),
-		5*time.Minute,
-		Ctx,
-	))
+	/*
+		Ctx.Tournament.AddMatchSlot(lib.NewMatchSlot(
+			time.Now().Add(30*time.Second),
+			5*time.Minute,
+			Ctx,
+		))
+	*/
 
 	httpHandler := server.HTTPHandler{Context: Ctx}
 	fileHandler := server.FileProxyHandler{Context: Ctx}
@@ -94,7 +88,6 @@ func main() {
 	wg := sync.WaitGroup{}
 	go func() {
 		// running server
-		defer wg.Done()
 		http.ListenAndServe(":8080", web)
 	}()
 
@@ -129,4 +122,6 @@ func main() {
 		open.Start("http://localhost:8080")
 	}
 	wg.Wait()
+
+	log.Info("Done")
 }
