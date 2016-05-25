@@ -98,7 +98,10 @@ func NewLog(processor func(line *LogLine), conf *Config) *Log {
 		for {
 			select {
 			case <-ticker.C:
+				mem := &runtime.MemStats{}
+				runtime.ReadMemStats(mem)
 				l.Debug(fmt.Sprintf("Goroutines count: %v", runtime.NumGoroutine()))
+				l.Debug(fmt.Sprintf("MEM allocated (MB): %v", mem.Sys/(1024.0*1024.0)))
 			}
 		}
 	}(l)

@@ -1,7 +1,7 @@
 {
 	"ImportPath": "github.com/martin-reznik/jinglemanager",
 	"GoVersion": "go1.6",
-	"GodepVersion": "v63",
+	"GodepVersion": "v71",
 	"Packages": [
 		"./..."
 	],
@@ -32,7 +32,7 @@
 		},
 		{
 			"ImportPath": "github.com/martin-reznik/logger",
-			"Rev": "17689f3ecfb1d940bfed0a5630d28cba4c389269"
+			"Rev": "5cdd620758d61d0900b201c143c33c64441d04df"
 		},
 		{
 			"ImportPath": "github.com/mattn/go-colorable",
