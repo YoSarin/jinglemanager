@@ -179,7 +179,7 @@ function slotDisplay() {
     $.each(slots.displayList(), function(k, v) {
         var item = $('<div class="slot upcoming">')
             .css("height", (resolution * v.duration) + "px")
-            .css("border-top", (resolution * v.gapBefore) + "px solid #ccc");
+            .css("border-top-width", (resolution * v.gapBefore) + "px");
         if ((v.duration * resolution) >= 30) {
             item.append(formatSlotDate(v.start) + ' - ' + formatSlotDate(v.end))
             .append($("<br />"))

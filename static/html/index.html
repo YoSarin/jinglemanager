@@ -15,7 +15,6 @@
 </head>
 <body>
     <h1>{{.TournamentName}}</h1>
-    <a href="/app/mute">Ztlum hudbu</a> | <a href="/app/unmute">Ohul hudbu</a>
     <div id="sideColumn">
         <div id="slots" class="timescale">
             <div class="pointer"></div>
@@ -53,7 +52,9 @@
     -->
     <footer>
         <a href="/save" method="GET">Uložit</a> |
-        <a method="visit" href="/start">Nový turnaj</a>
+        <a method="visit" href="/start">Nový turnaj</a> |
+        <a href="/app/mute">Ztlum hudbu</a> |
+        <a href="/app/unmute">Ohul hudbu</a>
     </footer>
     <div id="logs"></div>
     <iframe src="" id="downloader" name="downloader" style="display: none;"></iframe>
