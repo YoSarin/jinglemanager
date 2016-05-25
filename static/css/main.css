@@ -42,6 +42,37 @@ body { color: #88f; }
     line-height: 30px;
 }
 
+.slot {
+    padding: 0px 4px 0px 10px;
+    text-align: right;
+}
+
+.slot.done {
+    background-color: #ddd;
+}
+
+.slot.current {
+    background-color: #dfd;
+}
+
+.slot.upcoming {
+    background-color: #ddf;
+}
+
+#slots {
+    position: relative;
+}
+
+#slots .pointer {
+    position: absolute;
+    text-align: right;
+    color: #000;
+}
+
+.metro .centered {
+    line-height: 72px;
+}
+
 .metro {
     overflow: hidden;
     display: block;
@@ -81,9 +112,13 @@ legend {
     display: none;
 }
 
+.slot {
+    background-color: #ddf;
+}
+
 #sideColumn {
     float: right;
-    width: 30%;
+    min-width: 150px;
 }
 
 small.help {
@@ -94,4 +129,8 @@ small.help {
 
 small.help:hover {
     color: #000;
+}
+
+.separator {
+    display: block;
 }

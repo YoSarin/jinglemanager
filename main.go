@@ -27,7 +27,7 @@ func main() {
 	log.LogSeverity[logger.DEBUG] = true
 
 	Ctx := lib.NewContext(log)
-	Ctx.LoadByName(Ctx.LastTournament())
+	Ctx.LoadCurrent()
 
 	defer Ctx.AppClosed()
 
@@ -81,6 +81,7 @@ func main() {
 
 	web.GET("/save", storageHandler.Save)
 	web.POST("/load", storageHandler.Load)
+	web.POST("/open/:filename", storageHandler.Open)
 
 	web.GET("/changes", socketHandler.HandleChangeSocket)
 	web.GET("/logs", socketHandler.HandleLogSocket)

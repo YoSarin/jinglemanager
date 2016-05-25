@@ -11,7 +11,6 @@ import (
 	"io/ioutil"
 	"os"
 	"path"
-	"time"
 )
 
 // Song - queue item containing info about playing sound
@@ -38,6 +37,7 @@ const (
 )
 
 var (
+	// ChannelSong - channel to emmit song changes to
 	ChannelSong = Channel{name: "song", allowed: map[EventType]bool{
 		EventTypeSongChange:  true,
 		EventTypeSongAdded:   true,
@@ -108,13 +108,13 @@ func (s *Song) Play(onPlayDone func()) {
 	ChannelSong.Emit(EventTypeSongChange, s)
 
 	go func() {
-		defer s.playbackDone()
-		defer onPlayDone()
-
 		ao.Initialize()
 		// defer ao.Shutdown()
 		dev := ao.NewLiveDevice(s.ao)
 		defer dev.Close()
+
+		defer s.playbackDone()
+		defer onPlayDone()
 
 		reportingTreshold := int64(s.bytesTotal / 100)
 		lastlyReported := int64(0)
@@ -122,7 +122,6 @@ func (s *Song) Play(onPlayDone func()) {
 		for step := int64(s.bytesPlayed / bufSize); step < s.bytesTotal/bufSize; step++ {
 			select {
 			case <-s.stopPlayback:
-				s.context.Log.Info("Done at %v", time.Now())
 				return
 			default:
 				size, err := dev.Write(s.stream[step*bufSize : (step+1)*bufSize])
@@ -156,8 +155,6 @@ func (s *Song) Pause() {
 	if !s.IsPlaying() {
 		return
 	}
-
-	s.context.Log.Info("Asked to stop song at %v", time.Now())
 
 	s.stopPlayback <- true
 	// wait for confirmation that playback has stopped

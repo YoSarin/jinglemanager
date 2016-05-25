@@ -3,7 +3,6 @@ package lib
 import (
 	"archive/zip"
 	"bufio"
-	"errors"
 	"fmt"
 	"gopkg.in/yaml.v2"
 	"io"
@@ -11,7 +10,11 @@ import (
 	"os"
 	"os/user"
 	"path"
+	"path/filepath"
+	"regexp"
 )
+
+const fileExtension = "jManager"
 
 type data struct {
 	Tournament   *Tournament
@@ -41,18 +44,15 @@ func (c *Context) Save() []byte {
 			f.Write(out)
 		}
 
-		last, _ := os.Create(path.Join(c.AppDir(), "last.tournament"))
-		last.Write([]byte(c.Tournament.Name))
-		defer last.Close()
-
 		c.Archive()
 		return out
 	}
 	return []byte{}
 }
 
+// Archive - will store context into single file
 func (c *Context) Archive() {
-	target := path.Join(c.AppDir(), fmt.Sprintf("%v.jManager", c.Tournament.Name))
+	target := path.Join(c.AppDir(), fmt.Sprintf("%v.%v", c.Tournament.Name, fileExtension))
 	f, err := os.Create(target)
 	if err != nil {
 		c.Log.Error(err.Error())
@@ -102,9 +102,7 @@ func (c *Context) Load(input []byte) {
 		return
 	}
 
-	c.Tournament = d.Tournament
-	c.Tournament.context = c
-	c.Tournament.PlanJingles()
+	c.Tournament = NewTournament(d.Tournament.Name, c)
 	for _, val := range d.Jingles {
 		s, err := NewSong(val.File, c)
 		if err != nil {
@@ -118,13 +116,14 @@ func (c *Context) Load(input []byte) {
 		c.Log.Debug("adding application: " + val)
 		c.Sound.AddUniq(val, c.Log)
 	}
+	for _, val := range d.Tournament.MatchSlots {
+		c.Tournament.AddMatchSlot(NewMatchSlot(val.StartsAt, val.Duration, c))
+	}
 }
 
-// LoadByName - will load data from file
-func (c *Context) LoadByName(name string) error {
-	if name == "" {
-		return errors.New("Nothing to load")
-	}
+// LoadCurrent - will load current tournament
+func (c *Context) LoadCurrent() error {
+	name := "current"
 	f, err := os.Open(path.Join(c.AppDir(), name, "config.yml"))
 	if err != nil {
 		c.Log.Error("File opening error " + name + ": " + err.Error())
@@ -138,6 +137,39 @@ func (c *Context) LoadByName(name string) error {
 	}
 	c.Load(data)
 	return nil
+}
+
+// Open - will open archived tournament
+func (c *Context) Open(name string) {
+	// we'll remove all old contents
+	os.RemoveAll(c.StorageDir())
+	// and recreate directories structure
+	c.MediaDir()
+
+	r, err := zip.OpenReader(path.Join(c.AppDir(), fmt.Sprintf("%v.%v", name, fileExtension)))
+	if err != nil {
+		c.Log.Error(err.Error())
+	}
+	defer r.Close()
+
+	// Iterate through the files in the archive,
+	// printing some of their contents.
+	for _, f := range r.File {
+		rc, err := f.Open()
+		if err != nil {
+			c.Log.Error(err.Error())
+		}
+		dst, _ := os.Create(path.Join(c.StorageDir(), f.Name))
+		_, err = io.Copy(dst, rc)
+		if err != nil {
+			c.Log.Error(err.Error())
+		}
+		rc.Close()
+		dst.Close()
+	}
+
+	c.LoadCurrent()
+	ChannelTournament.Emit(EventTypeReload, "new tournament opened")
 }
 
 // SaveSong - will save uploaded song file into tournament directory
@@ -167,9 +199,23 @@ func (c *Context) RemoveSong(filename string) error {
 	return os.Remove(filepath)
 }
 
+// ListTournaments - will list tournaments which are already loaded
+func (c *Context) ListTournaments() []string {
+	list, err := filepath.Glob(path.Join(c.AppDir(), fmt.Sprintf("*.%v", fileExtension)))
+	if err != nil {
+		c.Log.Error(err.Error())
+		return []string{}
+	}
+	re := regexp.MustCompile(fmt.Sprintf(".*(\\\\|/)([^\\\\/]+)\\.%v$", fileExtension))
+	for key := range list {
+		list[key] = string(re.ReplaceAll([]byte(list[key]), []byte("$2")))
+	}
+	return list
+}
+
 // StorageDir - return path to current tournament directory (and creates path if necessarry)
 func (c *Context) StorageDir() string {
-	p := path.Join(c.AppDir(), c.Tournament.Name)
+	p := path.Join(c.AppDir(), "current")
 	os.MkdirAll(p, 0700)
 	return path.Join(p)
 }
@@ -187,11 +233,4 @@ func (c *Context) AppDir() string {
 	p := path.Join(u.HomeDir, ".jinglemanager")
 	os.MkdirAll(p, 0700)
 	return path.Join(p)
-}
-
-// LastTournament - return path to application directory
-func (c *Context) LastTournament() string {
-	f, _ := os.Open(path.Join(c.AppDir(), "last.tournament"))
-	t, _ := ioutil.ReadAll(f)
-	return string(t)
 }

@@ -30,7 +30,8 @@ func (i *HTTPHandler) Index(w http.ResponseWriter, r *http.Request, ps httproute
 	if i.Context.Tournament.Name != "" {
 		t, err = template.ParseFiles("static/html/index.html")
 	} else {
-		t, err = template.ParseFiles("static/html/new_tournament.html")
+		http.Redirect(w, r, "/start", 302)
+		return
 	}
 	if err != nil {
 		i.Context.Log.Error(err.Error())
@@ -40,7 +41,7 @@ func (i *HTTPHandler) Index(w http.ResponseWriter, r *http.Request, ps httproute
 	t.Execute(w, &IndexData{"Jingle Manager", i.Context.Tournament.Name})
 }
 
-// Start - will serve index page
+// Start - will serve creator page
 func (i *HTTPHandler) Start(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	t, err := template.ParseFiles("static/html/new_tournament.html")
 	if err != nil {
@@ -48,7 +49,16 @@ func (i *HTTPHandler) Start(w http.ResponseWriter, r *http.Request, ps httproute
 		http.Error(w, "Internal Server Error", 500)
 		return
 	}
-	t.Execute(w, &IndexData{"Jingle Manager", i.Context.Tournament.Name})
+
+	t.Execute(w, &struct {
+		Title          string
+		TournamentName string
+		List           []string
+	}{
+		Title:          "Jingle Manager",
+		TournamentName: i.Context.Tournament.Name,
+		List:           i.Context.ListTournaments(),
+	})
 }
 
 // NewTournament - will serve index page

@@ -17,7 +17,7 @@ jQuery.fn.multi_click = function(single_click_callback, double_click_callback, t
                         triple_click_callback.call(self, event);
                     }
                     clicks = 0;
-                }, timeout || 300);
+                }, timeout || 100);
             }
         });
     });

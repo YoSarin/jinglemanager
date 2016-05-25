@@ -1,16 +1,37 @@
 <html>
 <head>
-    <link media="screen" href="/css/main.css" rel="stylesheet" type="text/css" />
     <title>{{.Title}}</title>
+
+    <link media="screen" href="/css/jquery-ui.css" rel="stylesheet" type="text/css" />
+    <link media="screen" href="/css/jquery-ui.structure.css" rel="stylesheet" type="text/css" />
+    <link media="screen" href="/css/jquery-ui.theme.css" rel="stylesheet" type="text/css" />
+    <link media="screen" href="/css/main.css" rel="stylesheet" type="text/css" />
+
     <script type="text/javascript" src="/js/jquery.js"></script>
-    <script type="text/javascript" src="/js/main.js"></script>
+    <script type="text/javascript" src="/js/jquery_extensions.js"></script>
+    <script type="text/javascript" src="/js/jquery-ui.js"></script>
+    <script type="text/javascript" src="/js/clicker.js"></script>
+    <script type="text/javascript" src="/js/metro.js"></script>
+    <script type="text/javascript" src="/js/start.js"></script>
 </head>
 <body>
-    <h2>Nový turnaj</h2>
+    <h2>Připrav turnaj</h2>
     <form action="/tournament/new" method="POST">
         <label for="name">Jméno turnaje:</label> <input type="text" name="name" /><input type="submit" value="Oukej" />
     </form>
-    <h2>Načíst turnaj</h2>
+    <b class="separator">Nebo</b>
+    <h2>Otevři existující konfiguraci</h2>
+    <ul class="metro" id="tournamentList">
+    {{range $key, $value := .List}}
+        <li>
+            <div class="outer"><div class="content">
+                <a class="centered" href="/open/{{$value}}">{{$value}}</a>
+            </div></div>
+        </li>
+    {{end}}
+    </ul>
+    <b class="separator">Nebo</b>
+    <h2>Nahraj soubor co ti někdo poslal</h2>
     <form id="load" action="/load" method="POST" enctype="multipart/form-data">
         <input type="file" name="file" />
         <input type="submit" value="Načíst nastavení"/>

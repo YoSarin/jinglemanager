@@ -13,9 +13,6 @@ $(document).ready(function() {
     showHideJingleMatchDetails();
 });
 
-$(window).resize(function (event) {
-    metroResize();
-});
 
 var Handler = {
     "song_changed"   : songChange,
@@ -28,6 +25,9 @@ var Handler = {
     "jingle_removed" : jingleRemove,
     "log"            : log,
 }
+
+var slots = new Timescale();
+var resolution = 1; // pixels per minute
 
 connectSocket("changes");
 connectSocket("logs");
@@ -64,8 +64,6 @@ function connectSocket(name) {
 }
 
 function hook() {
-    $('a').click(clicker);
-
     $("form.ajax").submit(function () {
         var f = $(this);
         $.ajax(f.attr("action"), {
@@ -101,27 +99,9 @@ function load() {
     $.ajax("/app/list", {
         success: function(data, status) { listApps(data); }
     });
-}
-
-function metroResize() {
-    $(".metro").each(function (k, v) {
-        var count = $(this).find("li").length;
-        var width = Math.floor($(this).width() - 0.5);
-        var maxRowItems = Math.floor(width/250);
-        var counter = 0;
-        $(v).find("li").each(function (_, item) {
-            var rowItems = Math.min(maxRowItems, count - (Math.floor(counter / maxRowItems) * maxRowItems));
-            var w =  Math.floor(width / Math.min(rowItems, maxRowItems));
-            $(item).width(w + "px");
-            counter++;
-        });
+    $.ajax("/slot/list", {
+        success: function(data, status) { listSlots(data); }
     });
-
-    if ($(window).width() < 400) {
-        $("#sideColumn").css("float", "none");
-    } else {
-        $("#sideColumn").css("float", "right");
-    }
 }
 
 function showHideJingleMatchDetails() {
@@ -173,6 +153,67 @@ function listApps(data) {
     } catch (e) {
         console.log(e);
     }
+}
+
+function listSlots(data) {
+    try {
+        var data = $.parseJSON(data);
+        $.each(data, function (k, v) {
+            slotAdd(v)
+        });
+    } catch (e) {
+        console.log(e);
+    }
+}
+
+function slotAdd(slot) {
+    slots.add(new Slot(slot.StartsAt, slot.Duration));
+    slotDisplay();
+}
+
+function slotDisplay() {
+    $("#slots").empty();
+    var totalDuration = slots.duration();
+    $("#slots").append($("<div>").addClass("pointer").append("&rarr;"));
+    movePointer();
+    $.each(slots.displayList(), function(k, v) {
+        var item = $('<div class="slot upcoming">')
+            .css("height", (resolution * v.duration) + "px")
+            .css("border-top", (resolution * v.gapBefore) + "px solid #ccc");
+        if ((v.duration * resolution) >= 30) {
+            item.append(formatSlotDate(v.start) + ' - ' + formatSlotDate(v.end))
+            .append($("<br />"))
+            .append($("<small>")
+                .append(v.duration + " minut")
+            );
+        }
+
+        window.setTimeout(function () {
+            item.addClass("current");
+            item.removeClass("upcoming");
+        }, v.start - Date.now());
+
+        window.setTimeout(function () {
+            item.removeClass("current");
+            item.addClass("done");
+        }, v.end - Date.now());
+
+        $("#slots").append(item);
+    });
+
+    metroResize();
+}
+
+function movePointer() {
+    var elapsed = (Date.now() - slots.start()) / 1000 / 60;
+    var height = $("#slots .pointer").height();
+    $("#slots .pointer").css("top", (elapsed * resolution - Math.ceil(height/2.0)) + "px")
+
+    window.setTimeout(movePointer, 1000 * 60);
+}
+
+function formatSlotDate(v) {
+    return lpad(v.getHours(), 2, "0") + ":" + lpad(v.getMinutes(), 2, "0");
 }
 
 function appAdd(app) {
@@ -301,30 +342,6 @@ function songChange(song) {
     });
 }
 
-function clicker(event) {
-    var callback;
-    if (event == null || event.data == null || typeof event.data.callback == 'undefined') {
-        callback = defaultCallback;
-    } else {
-        callback = event.data.callback;
-    }
-    var m = $(this).attr("method");
-    var href = $(this).attr("href")
-    if (m == "download") {
-        $('iframe#downloader').attr("src", href);
-    } else if (m == "visit") {
-        return true;
-    } else {
-        $.ajax(href, {
-            method: (m ? m : "POST"),
-            success: function(data, status) { callback(data); },
-            complete: function() { console.log("complete"); },
-            error: function() { console.log("error"); }
-        });
-    }
-    return false;
-}
-
 function log(log) {
     $('#logs')
         .prepend(
@@ -336,6 +353,11 @@ function log(log) {
         )
 }
 
-function defaultCallback(data) {
-    console.log("DefaultCallback: ", data);
+function lpad (string, lenght, char) {
+    char = char || " ";
+    var o = string.toString()
+	while (o.length < lenght) {
+		o = char + o;
+	}
+	return o;
 }

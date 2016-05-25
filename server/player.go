@@ -5,6 +5,7 @@ import (
 	"github.com/julienschmidt/httprouter"
 	"github.com/martin-reznik/jinglemanager/lib"
 	"net/http"
+	"time"
 )
 
 // PlayerHandler - player handler
@@ -81,6 +82,7 @@ func (p *PlayerHandler) Pause(w http.ResponseWriter, r *http.Request, ps httprou
 		return
 	}
 	s.Pause()
+	p.Context.Log.Info("paused: %v", time.Now())
 
 	output, _ := json.Marshal(p.Context.Songs.GetAll())
 	w.Write(output)

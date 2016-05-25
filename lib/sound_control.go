@@ -33,6 +33,7 @@ const (
 )
 
 var (
+	// ChannelApp - channel to emmit app changes to
 	ChannelApp = Channel{name: "app", allowed: map[EventType]bool{EventTypeVolumeChange: true, EventTypeAppAdded: true, EventTypeAppRemoved: true}}
 )
 

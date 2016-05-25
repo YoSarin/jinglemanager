@@ -14,6 +14,7 @@ const (
 )
 
 var (
+	// ChannelJingle - channel to emit jingle changes
 	ChannelJingle = Channel{name: "jingle", allowed: map[EventType]bool{EventTypeJingleAdded: true, EventTypeJingleRemoved: true}}
 )
 

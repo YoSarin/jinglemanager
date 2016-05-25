@@ -22,6 +22,13 @@ func (s *StorageHandler) Save(w http.ResponseWriter, r *http.Request, ps httprou
 	// w.Write(out)
 }
 
+// Open - will open uploaded file
+func (s *StorageHandler) Open(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	name := ps.ByName("filename")
+	s.Context.Open(name)
+	http.Redirect(w, r, "/", 302)
+}
+
 // Load - will load data from specified file
 func (s *StorageHandler) Load(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	file, _, err := r.FormFile("file")

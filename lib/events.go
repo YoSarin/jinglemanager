@@ -1,6 +1,9 @@
 package lib
 
+// EventType - event types emmited on Channels
 type EventType string
+
+// Channel - channel to emmit events to
 type Channel struct {
 	name    string
 	allowed map[EventType]bool
@@ -23,6 +26,7 @@ type event struct {
 
 var listeners = make(map[*Channel][]chan interface{})
 
+// MultiSubscribe - will create subscribe to multiple channels
 func MultiSubscribe(list []*Channel) (chan interface{}, func()) {
 	ch := make(chan interface{})
 	for _, c := range list {
@@ -56,6 +60,7 @@ func (c *Channel) Subscribe() (chan interface{}, func()) {
 	}
 }
 
+// Name - will return channels name
 func (c *Channel) Name() string {
 	return c.name
 }

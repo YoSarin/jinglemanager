@@ -11,6 +11,7 @@ type Tournament struct {
 	context    *Context
 }
 
+// TournamentMatchSlot - marshalable container for match slots
 type TournamentMatchSlot struct {
 	*MatchSlot
 	place int
@@ -34,6 +35,7 @@ const (
 )
 
 var (
+	// ChannelTournament - channel to emmit tournament changes to
 	ChannelTournament = Channel{name: "tournament", allowed: map[EventType]bool{
 		EventTypeTournamentChange: true,
 		EventTypeMatchSlotAdded:   true,
@@ -68,7 +70,7 @@ func (t *Tournament) AddMatchSlot(m *MatchSlot) {
 	s := &TournamentMatchSlot{m, len(t.MatchSlots)}
 	t.MatchSlots = append(t.MatchSlots, s)
 	for _, j := range t.context.Jingles.JingleList() {
-		m.Notify(j.TimeBeforePoint, j.Point, j.Play)
+		m.Notify(j)
 	}
 	ChannelTournament.Emit(EventTypeMatchSlotAdded, struct {
 		Slot  *TournamentMatchSlot
@@ -89,10 +91,17 @@ func (t *Tournament) RemoveMatchSlot(place int) {
 // PlanJingles - will plan jingles
 func (t *Tournament) PlanJingles() {
 	for _, m := range t.MatchSlots {
+		m.Cancel()
 		for _, j := range t.context.Jingles.JingleList() {
-			m.Cancel()
-			m.Notify(j.TimeBeforePoint, j.Point, j.Play)
+			m.Notify(j)
 		}
+	}
+}
+
+// CancelJingles - will cancel jingles
+func (t *Tournament) CancelJingles() {
+	for _, m := range t.MatchSlots {
+		m.Cancel()
 	}
 }
 

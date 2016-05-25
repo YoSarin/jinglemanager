@@ -12,13 +12,17 @@ type Context struct {
 const (
 	// EventTypeCleanup - event type related to total cleanup
 	EventTypeCleanup = EventType("cleanup")
+	// EventTypeReload - event type asking browser to reload view
+	EventTypeReload = EventType("reload")
 )
 
 var (
-	context        *Context
+	context *Context
+	// ChannelCleanup - Channel for cleanup events
 	ChannelCleanup = Channel{name: "cleanup", allowed: map[EventType]bool{EventTypeCleanup: true}}
 )
 
+// NewContext - will create new context
 func NewContext(log LogI) *Context {
 	Ctx := &Context{}
 
@@ -38,6 +42,7 @@ func (c *Context) NewTournament(name string) {
 }
 
 func (c *Context) cleanup() {
+	c.Tournament.CancelJingles()
 	c.Songs = NewUniqueList()
 	c.Sound = NewSoundController(c.Log)
 	c.Tournament = NewTournament("", c)
@@ -45,6 +50,7 @@ func (c *Context) cleanup() {
 	ChannelCleanup.Emit(EventTypeCleanup, struct{}{})
 }
 
+// AppClosed - callback for application being closed
 func (c *Context) AppClosed() {
 	c.Sound.ReleaseApps()
 	c.Log.Info("Apps released")

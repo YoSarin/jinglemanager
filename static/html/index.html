@@ -8,13 +8,18 @@
     <script type="text/javascript" src="/js/jquery.js"></script>
     <script type="text/javascript" src="/js/jquery_extensions.js"></script>
     <script type="text/javascript" src="/js/jquery-ui.js"></script>
+    <script type="text/javascript" src="/js/clicker.js"></script>
+    <script type="text/javascript" src="/js/metro.js"></script>
+    <script type="text/javascript" src="/js/timescale.js"></script>
     <script type="text/javascript" src="/js/main.js"></script>
 </head>
 <body>
     <h1>{{.TournamentName}}</h1>
     <a href="/app/mute">Ztlum hudbu</a> | <a href="/app/unmute">Ohul hudbu</a>
     <div id="sideColumn">
-        <h2>Zápasy</h2>
+        <div id="slots" class="timescale">
+            <div class="pointer"></div>
+        </div>
     </div>
     <h2>Jingly
         <small class="help">
@@ -24,6 +29,7 @@
     <ul class="metro" id="jingles"></ul>
     <h2>Aplikace <small>(které se budou ztlumovat)</small></h2>
     <ul id="apps" class="metro"></ul>
+    <!--
     <form id="addJingle" action="/jingle/add" enctype="multipart/form-data" method="POST" target="downloader">
         <legend>Přidat song</legend>
         <input type="file" name="file" />
@@ -44,6 +50,7 @@
         <legend>Přidat aplikaci na ztlumení</legend>
         <input type="text" name="name" /><input type="submit" value="Jop" />
     </form>
+    -->
     <footer>
         <a href="/save" method="GET">Uložit</a> |
         <a method="visit" href="/start">Nový turnaj</a>

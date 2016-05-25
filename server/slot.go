@@ -9,6 +9,7 @@ import (
 	"time"
 )
 
+// SlotHandler - handling slot API events
 type SlotHandler struct {
 	Context *lib.Context
 }
