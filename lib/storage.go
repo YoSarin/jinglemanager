@@ -116,7 +116,9 @@ func (c *Context) Load(input []byte) {
 		c.Sound.AddUniq(val, c.Log)
 	}
 	for _, val := range d.Tournament.MatchSlots {
-		c.Tournament.AddMatchSlot(NewMatchSlot(val.StartsAt, val.Duration, c))
+		if val != nil {
+			c.Tournament.AddMatchSlot(NewMatchSlot(val.StartsAt, val.Duration, c))
+		}
 	}
 }
 

@@ -42,39 +42,6 @@ body { color: #88f; }
     line-height: 30px;
 }
 
-.slot {
-    padding: 0px 4px 0px 10px;
-    text-align: right;
-    border-width: 0px;
-    border-color: #fff;
-    border-style: solid;
-}
-
-.slot.done {
-    background-color: #fafafa;
-    color: #ddd;
-}
-
-.slot.current {
-    background-color: #dfd;
-    color: #282;
-}
-
-.slot.upcoming {
-    background-color: #ddf;
-    color: #228;
-}
-
-#slots {
-    position: relative;
-}
-
-#slots .pointer {
-    position: absolute;
-    text-align: right;
-    color: #000;
-}
-
 .metro .centered {
     line-height: 72px;
 }
@@ -118,13 +85,50 @@ legend {
     display: none;
 }
 
-.slot {
-    background-color: #ddf;
+#slots {
+    position: relative;
+    width: 100%;
+    display: block;
+    overflow: hidden;
+    padding-top: 15px;
 }
 
-#sideColumn {
-    float: right;
-    min-width: 150px;
+#slots .pointer {
+    position: absolute;
+    text-align: right;
+    color: #000;
+    top: 0px;
+}
+
+
+.slot {
+    background-color: #ddf;
+    padding: 0px;
+    text-align: right;
+    border-width: 0px;
+    border-color: #fff;
+    border-style: solid;
+    float: left;
+    min-height: 20px;
+}
+
+.slot .inner {
+    padding: 3px 5px;
+}
+
+.slot.done {
+    background-color: #fafafa;
+    color: #ddd;
+}
+
+.slot.current {
+    background-color: #dfd;
+    color: #282;
+}
+
+.slot.upcoming {
+    background-color: #ddf;
+    color: #228;
 }
 
 small.help {

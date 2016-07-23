@@ -13,6 +13,10 @@ $(document).ready(function() {
     showHideJingleMatchDetails();
 });
 
+$(window).resize(function() {
+    slotDisplay();
+});
+
 
 var Handler = {
     "song_changed"   : songChange,
@@ -174,17 +178,22 @@ function slotAdd(slot) {
 function slotDisplay() {
     $("#slots").empty();
     var totalDuration = slots.duration();
-    $("#slots").append($("<div>").addClass("pointer").append("&rarr;"));
+    $("#slots").append($("<div>").addClass("pointer").append("&dtrif;"));
+    resolution = parseInt($("#slots").width()) / slots.duration();
+    // console.log(resolution, $("#slots").width(), slots.duration());
     movePointer();
     $.each(slots.displayList(), function(k, v) {
         var item = $('<div class="slot upcoming">')
-            .css("height", (resolution * v.duration) + "px")
-            .css("border-top-width", (resolution * v.gapBefore) + "px");
-        if ((v.duration * resolution) >= 30) {
-            item.append(formatSlotDate(v.start) + ' - ' + formatSlotDate(v.end))
-            .append($("<br />"))
-            .append($("<small>")
-                .append(v.duration + " minut")
+            .css("width", Math.floor(resolution * v.duration) + "px")
+            .css("border-left-width", (resolution * v.gapBefore) + "px");
+
+        if ((v.duration * resolution) >= 60) {
+            item.append($("<div>").addClass("inner")
+                .append("&#8614;" + formatSlotDate(v.start) + "<br />&rarrb;" + formatSlotDate(v.end))
+                .append($("<br />"))
+                .append($("<small>")
+                    .append(v.duration + " minut")
+                )
             );
         }
 
@@ -207,7 +216,7 @@ function slotDisplay() {
 function movePointer() {
     var elapsed = (Date.now() - slots.start()) / 1000 / 60;
     var height = $("#slots .pointer").height();
-    $("#slots .pointer").css("top", (elapsed * resolution - Math.ceil(height/2.0)) + "px")
+    $("#slots .pointer").css("left", (elapsed * resolution - Math.ceil(height/2.0)) + "px")
 
     window.setTimeout(movePointer, 1000 * 60);
 }
