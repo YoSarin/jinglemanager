@@ -6,6 +6,8 @@ import (
 	"github.com/martin-reznik/jinglemanager/lib"
 	"html/template"
 	"net/http"
+	"strconv"
+	"time"
 )
 
 // HTTPHandler - handler for serving httpPages
@@ -64,8 +66,42 @@ func (i *HTTPHandler) Start(w http.ResponseWriter, r *http.Request, ps httproute
 // NewTournament - will serve index page
 func (i *HTTPHandler) NewTournament(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	name := r.FormValue("name")
+	loc := time.Now().Location()
+	parsed, err := time.ParseInLocation("15:04", r.FormValue("start"), loc)
+	if err != nil {
+		i.Context.Log.Error("Fuj: ", err)
+		http.Redirect(w, r, "/start", 302)
+		return
+	}
+	n := time.Now()
+	start := time.Date(n.Year(), n.Month(), n.Day(), parsed.Hour(), parsed.Minute(), parsed.Second(), parsed.Nanosecond(), parsed.Location())
+	matchDuration, err := strconv.Atoi(r.FormValue("duration"))
+	if err != nil {
+		i.Context.Log.Error("Fuj: ", err)
+		http.Redirect(w, r, "/start", 302)
+		return
+	}
+	breakDuration, err := strconv.Atoi(r.FormValue("break"))
+	if err != nil {
+		i.Context.Log.Error("Fuj: ", err)
+		http.Redirect(w, r, "/start", 302)
+		return
+	}
+	count, err := strconv.Atoi(r.FormValue("count"))
+	if err != nil {
+		i.Context.Log.Error("Fuj: ", err)
+		http.Redirect(w, r, "/start", 302)
+		return
+	}
+
 	i.Context.Save()
 	i.Context.NewTournament(name)
+
+	for n := 0; n < count; n++ {
+		matchStart := start.Add(time.Duration(n*(matchDuration+breakDuration)) * time.Minute)
+		m := lib.NewMatchSlot(matchStart, time.Duration(matchDuration)*time.Minute, i.Context)
+		i.Context.Tournament.AddMatchSlot(m)
+	}
 	http.Redirect(w, r, "/", 302)
 }
 

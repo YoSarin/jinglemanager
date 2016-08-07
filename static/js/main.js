@@ -218,8 +218,8 @@ function movePointer() {
     // just to make sure it won't run multiple times at once
     window.clearTimeout(pointerTimeout)
     var elapsed = (Date.now() - slots.start()) / 1000 / 60;
-    var height = $("#slots .pointer").height();
-    $("#slots .pointer").css("left", (elapsed * resolution - Math.ceil(height/2.0)) + "px")
+    var width = $("#slots .pointer").width();
+    $("#slots .pointer").css("left", (elapsed * resolution - Math.ceil(width/2.0)) + "px")
 
     pointerTimeout = window.setTimeout(movePointer, 1000 * 1);
 }
