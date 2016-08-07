@@ -1,14 +1,16 @@
 package lib
 
 import (
+	"math"
 	"time"
 )
 
 // Tournament - struct holding data about tournament
 type Tournament struct {
-	Name       string
-	MatchSlots []*TournamentMatchSlot
-	context    *Context
+	Name            string
+	MatchSlots      []*TournamentMatchSlot
+	context         *Context
+	jingleCheckStop chan bool
 }
 
 // TournamentMatchSlot - marshalable container for match slots
@@ -48,10 +50,29 @@ var (
 func NewTournament(name string, context *Context) *Tournament {
 
 	t := &Tournament{
-		Name:       name,
-		context:    context,
-		MatchSlots: []*TournamentMatchSlot{},
+		Name:            name,
+		context:         context,
+		MatchSlots:      []*TournamentMatchSlot{},
+		jingleCheckStop: make(chan bool),
 	}
+
+	var duration = time.Duration(1) * time.Second
+
+	ticker := time.NewTicker(duration)
+	go func() {
+		for {
+			select {
+			case <-ticker.C:
+				for _, j := range t.CurrentJingles(time.Now(), duration+time.Duration(1)*time.Second) {
+					if !j.IsPlaying() {
+						j.Play()
+					}
+				}
+			case <-t.jingleCheckStop:
+				ticker.Stop()
+			}
+		}
+	}()
 
 	ChannelTournament.Emit(EventTypeTournamentChange, t)
 	return t
@@ -69,9 +90,7 @@ func (t *Tournament) AddMatchSlot(m *MatchSlot) {
 	}
 	s := &TournamentMatchSlot{m, len(t.MatchSlots)}
 	t.MatchSlots = append(t.MatchSlots, s)
-	for _, j := range t.context.Jingles.JingleList() {
-		m.Notify(j)
-	}
+
 	ChannelTournament.Emit(EventTypeMatchSlotAdded, struct {
 		Slot  *TournamentMatchSlot
 		Place int
@@ -83,26 +102,34 @@ func (t *Tournament) AddMatchSlot(m *MatchSlot) {
 
 // RemoveMatchSlot - will set new name for tournament
 func (t *Tournament) RemoveMatchSlot(place int) {
-	t.MatchSlots[place].Cancel()
 	t.MatchSlots[place] = nil
 	ChannelTournament.Emit(EventTypeMatchSlotRemoved, place)
 }
 
-// PlanJingles - will plan jingles
-func (t *Tournament) PlanJingles() {
-	for _, m := range t.MatchSlots {
-		m.Cancel()
-		for _, j := range t.context.Jingles.JingleList() {
-			m.Notify(j)
-		}
-	}
-}
-
 // CancelJingles - will cancel jingles
 func (t *Tournament) CancelJingles() {
+	t.jingleCheckStop <- true
+}
+
+// CurrentJingles - will return list of jingles which should run at this very point in time
+func (t *Tournament) CurrentJingles(when time.Time, window time.Duration) []*Jingle {
+	var out []*Jingle
 	for _, m := range t.MatchSlots {
-		m.Cancel()
+		for _, j := range t.context.Jingles.JingleList() {
+			d := -1 * j.TimeBeforePoint
+
+			var timeTo time.Duration
+			if j.Point == MatchStart {
+				timeTo = -1 * time.Since(m.StartsAt.Add(d))
+			} else {
+				timeTo = -1 * time.Since(m.StartsAt.Add(d).Add(m.Duration))
+			}
+			if (time.Duration(math.Abs(timeTo.Seconds())) * time.Second) < window {
+				out = append(out, j)
+			}
+		}
 	}
+	return out
 }
 
 // SetName - will set new name for tournament
