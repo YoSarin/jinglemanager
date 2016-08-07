@@ -178,7 +178,7 @@ function slotAdd(slot) {
 function slotDisplay() {
     $("#slots").empty();
     var totalDuration = slots.duration();
-    $("#slots").append($("<div>").addClass("pointer").append("&dtrif;"));
+    $("#slots").append($("<div>").addClass("pointer").append('&dtrif;'));
     resolution = parseInt($("#slots").width()) / slots.duration();
     // console.log(resolution, $("#slots").width(), slots.duration());
     movePointer();
