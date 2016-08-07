@@ -5,6 +5,7 @@ var pointOrder = {
     "match_end"   : 1,
     "match_none"  : 2,
 }
+var pointerTimeout = null;
 
 
 $(document).ready(function() {
@@ -214,11 +215,13 @@ function slotDisplay() {
 }
 
 function movePointer() {
+    // just to make sure it won't run multiple times at once
+    window.clearTimeout(pointerTimeout)
     var elapsed = (Date.now() - slots.start()) / 1000 / 60;
     var height = $("#slots .pointer").height();
     $("#slots .pointer").css("left", (elapsed * resolution - Math.ceil(height/2.0)) + "px")
 
-    window.setTimeout(movePointer, 1000 * 60);
+    pointerTimeout = window.setTimeout(movePointer, 1000 * 1);
 }
 
 function formatSlotDate(v) {
