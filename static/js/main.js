@@ -9,6 +9,7 @@ var pointerTimeout = null;
 
 
 $(document).ready(function() {
+    healthcheck();
     hook();
     load();
     showHideJingleMatchDetails();
@@ -66,6 +67,18 @@ function connectSocket(name) {
             connectSocket(name);
         }, 5000);
     }
+}
+
+function healthcheck() {
+    $.ajax("/alive?", {
+        error: function() {
+            alert("Máchale, spadlo ti to...\n:(\nSpusť znovu jinglemanager.exe");
+            setTimeout(healthcheck, 5000);
+        },
+        success: function() {
+            setTimeout(healthcheck, 5000);
+        }
+    });
 }
 
 function hook() {
@@ -218,10 +231,27 @@ function movePointer() {
     // just to make sure it won't run multiple times at once
     window.clearTimeout(pointerTimeout)
     var elapsed = (Date.now() - slots.start()) / 1000 / 60;
-    var height = $("#slots .pointer").height();
-    $("#slots .pointer").css("left", (elapsed * resolution - Math.ceil(height/2.0)) + "px")
+    var missed = (Date.now() - slots.end()) / 1000 / 60;
+    var position = 0;
+    if (elapsed < 0) {
+        var h = lpad(Math.floor(Math.abs(elapsed / 60)), 2, "0");
+        var m = lpad(Math.floor(Math.abs(elapsed % 60)), 2, "0");
+        var s = lpad(Math.floor(Math.abs((elapsed * 60) % 60)), 2, "0")
+        $("#slots .pointer").html('&#9666; ' + h + ':' + m + ':' + s);
+        position = 0;
+    } else if (elapsed > (slots.end() - slots.start())/1000/60) {
+        var h = lpad(Math.floor(Math.abs(missed / 60)), 2, "0");
+        var m = lpad(Math.floor(Math.abs(missed % 60)), 2, "0");
+        var s = lpad(Math.floor(Math.abs((missed * 60) % 60)), 2, "0")
+        $("#slots .pointer").html(h + ':' + m + ':' + s + ' &#9656;');
+        position = $(document).width() - ($("#slots .pointer").width() + 20);
+    } else {
+        $("#slots .pointer").html('&#9662;');
+        position = elapsed * resolution - Math.ceil($("#slots .pointer").width()/2.0);
+    }
+    $("#slots .pointer").css("left", position + "px")
 
-    pointerTimeout = window.setTimeout(movePointer, 1000 * 1);
+    pointerTimeout = window.setTimeout(movePointer, 100 * 1);
 }
 
 function formatSlotDate(v) {
