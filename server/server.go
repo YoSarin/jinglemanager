@@ -1,6 +1,7 @@
 package server
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/julienschmidt/httprouter"
 	"github.com/martin-reznik/jinglemanager/lib"
@@ -103,6 +104,11 @@ func (i *HTTPHandler) NewTournament(w http.ResponseWriter, r *http.Request, ps h
 		i.Context.Tournament.AddMatchSlot(m)
 	}
 	http.Redirect(w, r, "/", 302)
+}
+
+func (i *HTTPHandler) Health(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	output, _ := json.Marshal(map[string]string{"status": "ok"})
+	w.Write(output)
 }
 
 // FileProxyHandler - struct handling file returns from server

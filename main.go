@@ -57,6 +57,7 @@ func main() {
 
 	web.GET("/", httpHandler.Index)
 	web.GET("/start", httpHandler.Start)
+	web.GET("/alive", httpHandler.Health)
 	web.POST("/tournament/new", httpHandler.NewTournament)
 
 	web.GET("/css/*filepath", fileHandler.Static)
