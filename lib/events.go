@@ -1,5 +1,9 @@
 package lib
 
+import (
+	"sync"
+)
+
 // EventType - event types emmited on Channels
 type EventType string
 
@@ -25,20 +29,25 @@ type event struct {
 }
 
 var listeners = make(map[*Channel][]chan interface{})
+var listenersMutex = &sync.Mutex{}
 
 // MultiSubscribe - will create subscribe to multiple channels
 func MultiSubscribe(list []*Channel) (chan interface{}, func()) {
 	ch := make(chan interface{})
 	for _, c := range list {
+		listenersMutex.Lock()
 		listeners[c] = append(listeners[c], ch)
+		listenersMutex.Unlock()
 	}
 	return ch, func() {
 		for _, c := range list {
+			listenersMutex.Lock()
 			for idx, chn := range listeners[c] {
 				if chn == ch {
 					listeners[c] = append(listeners[c][:idx], listeners[c][idx+1:]...)
 				}
 			}
+			listenersMutex.Unlock()
 		}
 		close(ch)
 	}
@@ -47,15 +56,19 @@ func MultiSubscribe(list []*Channel) (chan interface{}, func()) {
 // Subscribe - Will subscribe new listener and returns him and his defer function
 func (c *Channel) Subscribe() (chan interface{}, func()) {
 	ch := make(chan interface{})
+	listenersMutex.Lock()
 	listeners[c] = append(listeners[c], ch)
+	listenersMutex.Unlock()
 
 	return ch, func() {
+		listenersMutex.Lock()
 		for idx, chn := range listeners[c] {
 			if chn == ch {
 				listeners[c] = append(listeners[c][:idx], listeners[c][idx+1:]...)
 				break
 			}
 		}
+		listenersMutex.Unlock()
 		close(ch)
 	}
 }
@@ -72,6 +85,8 @@ func (c *Channel) Emit(evType EventType, data interface{}) {
 			Type EventType
 			Data interface{}
 		}{Type: evType, Data: data}
+
+		listenersMutex.Lock()
 		for _, ch := range listeners[c] {
 			go func(ch chan interface{}, ev interface{}) {
 				defer func() {
@@ -83,5 +98,6 @@ func (c *Channel) Emit(evType EventType, data interface{}) {
 				ch <- ev
 			}(ch, ev)
 		}
+		listenersMutex.Unlock()
 	}
 }

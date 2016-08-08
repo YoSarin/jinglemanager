@@ -9,6 +9,8 @@ import (
 type Tournament struct {
 	Name            string
 	MatchSlots      []*TournamentMatchSlot
+	Authorization   map[string]string
+	Public          bool
 	context         *Context
 	jingleCheckStop chan bool
 }

@@ -15,8 +15,8 @@ type Router struct {
 
 // MiddlewareI - interface needed to be implemented by middlewares
 type MiddlewareI interface {
-	ShouldPerform(*http.Request) bool
-	Perform(*http.Request) error
+	ShouldPerform(http.ResponseWriter, *http.Request) bool
+	Perform(http.ResponseWriter, *http.Request) error
 	OnError(http.ResponseWriter, *http.Request)
 }
 
@@ -38,8 +38,8 @@ func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	// perform middleware actions here
 	r.Log.Debug("You're hitting " + req.URL.String())
 	for _, m := range r.middlewares {
-		if m.ShouldPerform(req) {
-			err := m.Perform(req)
+		if m.ShouldPerform(w, req) {
+			err := m.Perform(w, req)
 			if err != nil {
 				m.OnError(w, req)
 				return

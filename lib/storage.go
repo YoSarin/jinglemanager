@@ -102,6 +102,8 @@ func (c *Context) Load(input []byte) {
 	}
 
 	c.Tournament = NewTournament(d.Tournament.Name, c)
+	c.Tournament.Public = d.Tournament.Public
+	c.Tournament.Authorization = d.Tournament.Authorization
 	for _, val := range d.Jingles {
 		s, err := NewSong(val.File, c)
 		if err != nil {

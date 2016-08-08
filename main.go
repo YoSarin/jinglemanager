@@ -53,7 +53,7 @@ func main() {
 
 	web := router.NewRouter(log)
 
-	web.AddMiddleware(router.NewAuthMiddleware(log))
+	web.AddMiddleware(router.NewAuthMiddleware(log, Ctx))
 
 	web.GET("/", httpHandler.Index)
 	web.GET("/start", httpHandler.Start)
