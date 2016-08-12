@@ -3,7 +3,6 @@ package router
 import (
 	"encoding/base64"
 	"errors"
-	"fmt"
 	"github.com/martin-reznik/jinglemanager/lib"
 	"net"
 	"net/http"

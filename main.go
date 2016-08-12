@@ -81,6 +81,7 @@ func main() {
 	web.GET("/app/list", controlHandler.List)
 
 	web.POST("/slot/add", slotHandler.Add)
+	web.POST("/slot/postpone", slotHandler.Postpone)
 	web.GET("/slot/list", slotHandler.List)
 
 	web.GET("/save", storageHandler.Save)

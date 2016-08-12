@@ -15,6 +15,8 @@ function clicker(event) {
         $('iframe#downloader').attr("src", href);
     } else if (m == "visit") {
         return true;
+    } else if (m == "none") {
+        callback();
     } else {
         $.ajax(href, {
             method: (m ? m : "POST"),

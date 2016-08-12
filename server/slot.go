@@ -26,6 +26,16 @@ func (h *SlotHandler) Add(w http.ResponseWriter, r *http.Request, ps httprouter.
 	))
 }
 
+// Postpone - will postpone all match slots by given duration in minutes
+func (h *SlotHandler) Postpone(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	r.ParseForm()
+	dur, _ := strconv.Atoi(r.FormValue("postpone"))
+	for _, slot := range h.Context.Tournament.MatchSlots {
+		slot.StartsAt = slot.StartsAt.Add(time.Duration(dur) * time.Minute)
+	}
+	h.List(w, r, ps)
+}
+
 // Remove - will remove match slot
 func (h *SlotHandler) Remove(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	r.ParseForm()

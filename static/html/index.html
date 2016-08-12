@@ -17,6 +17,12 @@
     <h1>{{.TournamentName}}</h1>
     <div id="slots" class="timescale">
     </div>
+    <p class="advanced">
+        Odložit zápasy o <a class="refreshSlots" href="/slot/postpone?postpone=10">10 minut</a> | <a class="refreshSlots" href="/slot/postpone?postpone=5">5 minut</a> | <a class="refreshSlots" href="/slot/postpone?postpone=1">1 minutu</a>
+    </p>
+    <p class="advanced">
+        Hrát zápasy dřív o <a class="refreshSlots" href="/slot/postpone?postpone=-10">10 minut</a> | <a class="refreshSlots" href="/slot/postpone?postpone=-5">5 minut</a> | <a class="refreshSlots" href="/slot/postpone?postpone=-1">1 minutu</a>
+    </p>
     <h2>Jingly
         <small class="help">
             1x klikni &rarr; play/pause | 2x klikni &rarr; stop | 3x klikni &rarr; smaž
@@ -25,7 +31,7 @@
     <ul class="metro" id="jingles"></ul>
     <h2>Aplikace <small>(které se budou ztlumovat)</small></h2>
     <ul id="apps" class="metro"></ul>
-    <form id="addJingle" action="/jingle/add" enctype="multipart/form-data" method="POST" target="downloader">
+    <form class="advanced" id="addJingle" action="/jingle/add" enctype="multipart/form-data" method="POST" target="downloader">
         <legend>Přidat song</legend>
         <input type="file" name="file" />
         <select name="play">
@@ -41,7 +47,7 @@
         </span>
         <input type="submit" value="&rarr;" title="přidat" />
     </form>
-    <form class="ajax" id="addApp" action="/app/add" method="POST">
+    <form class="ajax advanced" id="addApp" action="/app/add" method="POST">
         <legend>Přidat aplikaci na ztlumení</legend>
         <input type="text" name="name" /><input type="submit" value="Jop" />
     </form>
@@ -49,7 +55,8 @@
         <a href="/save" method="GET">Uložit</a> |
         <a method="visit" href="/start">Nový turnaj</a> |
         <a href="/app/mute">Ztlum hudbu</a> |
-        <a href="/app/unmute">Ohul hudbu</a>
+        <a href="/app/unmute">Ohul hudbu</a> |
+        <a class="toggleAdvanced" method="none" href="#advanced">zobrazit pokročilé ovládání</a>
     </footer>
     <div id="logs"></div>
     <iframe src="" id="downloader" name="downloader" style="display: none;"></iframe>

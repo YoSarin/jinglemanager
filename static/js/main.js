@@ -105,6 +105,19 @@ function hook() {
     $("#addJingle select[name=play]").change(function() {
         showHideJingleMatchDetails();
     });
+
+    $(".refreshSlots").unbind("click", clicker);
+    $(".refreshSlots").click(
+        {
+        callback: function(data) {
+                clearSlots();
+                listSlots(data);
+            }
+        }, clicker
+    );
+    $(".advanced").addClass("hidden");
+    $(".toggleAdvanced").unbind("click", clicker);
+    $(".toggleAdvanced").click({callback: function() { $(".advanced").toggleClass("hidden"); }}, clicker)
 }
 
 function load() {
@@ -173,6 +186,10 @@ function listApps(data) {
     }
 }
 
+function clearSlots() {
+    slots = new Timescale();
+}
+
 function listSlots(data) {
     try {
         var data = $.parseJSON(data);
@@ -198,7 +215,7 @@ function slotDisplay() {
     movePointer();
     $.each(slots.displayList(), function(k, v) {
         var item = $('<div class="slot upcoming">')
-            .css("width", Math.floor(resolution * v.duration) + "px")
+            .css("width", (resolution * v.duration) + "px")
             .css("border-left-width", (resolution * v.gapBefore) + "px");
 
         if ((v.duration * resolution) >= 60) {
